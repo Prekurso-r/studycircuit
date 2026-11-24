@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0b1230" id="theme-color">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Original practice questions for Cambridge International AS &amp; A Level Mathematics, Physics, Chemistry and Biology, organised by syllabus topic.">
+    <title>Study Circuit · A Level revision</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <script>
+      // Apply the saved colour theme before the first paint, so dark mode never flashes light.
+      (function () {
+        try {
+          var theme = localStorage.getItem('study-circuit:theme');
+          if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+        } catch (error) { /* storage blocked: follow the device */ }
+      })();
+    </script>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <!--
+    THESIS: The syllabus is a transit network the student rides; it refuses the study-app dashboard of stat tiles and pastel subject cards.
+    OWN-WORLD: Midnight enamel ground (porcelain by day), porcelain type, one saturated line ink per subject, lines bending only at 45 and 90 degrees, ring stations, Barlow Condensed tracked capitals over Barlow text, hairline panels, 4px corners.
+    STORY: The student sees their next stop, sees their syllabus as lines with practised stations lit, rides a round as a station strip, and comes back to lit progress.
+    FIRST VIEWPORT: Desktop: persistent left rail; left, "Next stop" at display size with Practise as the primary action and mixed practice secondary; right, the four-line network with the next station breathing. Phone: next stop first, each line as a station strip below.
+    FORM: catalog challenger "midnight transit diagram" (my list's #2 was a metro-map syllabus); seed 9a00a215.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
+    <a class="skip-link" href="#main" data-skip>Skip to main content</a>
+    <div class="app-shell">
+      <header class="app-header">
+        <button class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="desktop-sidebar" aria-label="Open navigation"><span data-icon="menu"></span></button>
+        <a class="brand" href="#/" aria-label="Study Circuit overview">
+          <span class="brand-mark" data-icon="brand"></span>
+          <span class="brand-text"><strong>Study Circuit</strong><small>A Level revision</small></span>
+        </a>
+        <div class="header-theme" data-theme-slot="compact"></div>
+      </header>
+      <aside id="desktop-sidebar" class="desktop-sidebar" inert>
+        <a class="brand rail-brand" href="#/" aria-label="Study Circuit overview">
+          <span class="brand-mark" data-icon="brand"></span>
+          <span class="brand-text"><strong>Study Circuit</strong><small>A Level revision</small></span>
+        </a>
+        <nav aria-label="Main navigation">
+          <a href="#/" data-nav="overview"><span data-icon="dashboard"></span>Overview</a>
+          <a href="#/subjects" data-nav="subjects"><span data-icon="books"></span>Subjects</a>
+          <a href="#/progress" data-nav="progress"><span data-icon="chart"></span>Progress</a>
+          <a href="#/saved" data-nav="saved"><span data-icon="bookmark"></span>Saved questions</a>
+        </nav>
+        <div class="rail-foot">
+          <div data-theme-slot="full"></div>
+          <p class="storage-note" id="storage-note"><span data-icon="device"></span><span>Progress is saved on this device.</span></p>
+        </div>
+      </aside>
+      <main id="main" class="main-content" tabindex="-1">
+        <noscript><h1>Study Circuit</h1><p>Enable JavaScript to open your revision dashboard and answer practice questions.</p></noscript>
+      </main>
+      <footer class="navigation-dock">
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="#/" data-nav="overview"><span data-icon="dashboard"></span><span>Overview</span></a>
+          <a href="#/subjects" data-nav="subjects"><span data-icon="books"></span><span>Subjects</span></a>
+          <a href="#/progress" data-nav="progress"><span data-icon="chart"></span><span>Progress</span></a>
+          <a href="#/saved" data-nav="saved"><span data-icon="bookmark"></span><span>Saved</span></a>
+        </nav>
+      </footer>
+    </div>
+    <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  </body>
+</html>
