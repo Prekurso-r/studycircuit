@@ -128,6 +128,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   text-transform: uppercase;
   transform: translateY(-110%);
 }
+.skip-link { transition: transform .2s ease; }
 .skip-link:focus { transform: translateY(0); }
 
 /* ---------- App frame ---------- */
@@ -193,16 +194,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .desktop-sidebar nav a:hover { background: var(--surface); color: var(--ink); }
 .desktop-sidebar nav a[aria-current="page"] { color: var(--ink); font-weight: 700; }
-.desktop-sidebar nav a::after {
-  content: "";
-  position: absolute;
-  left: 2.85rem;
-  bottom: .3rem;
-  width: 2.25rem;
-  height: 3px;
-  background: transparent;
-}
-.desktop-sidebar nav a[aria-current="page"]::after { background: var(--ink); }
 .rail-foot { display: grid; gap: .9rem; margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--hair); }
 .storage-note { display: flex; align-items: center; gap: .5rem; color: var(--muted); font-size: .8rem; line-height: 1.35; }
 .storage-note .icon { width: 1rem; height: 1rem; }
@@ -247,7 +238,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .main-nav a::after { content: ""; width: 1.75rem; height: 3px; margin-top: .15rem; background: transparent; }
 .main-nav a:hover { color: var(--ink); }
 .main-nav a[aria-current="page"] { color: var(--ink); font-weight: 700; }
-.main-nav a[aria-current="page"]::after { background: var(--ink); }
 .main-nav a:focus-visible { outline-offset: -3px; }
 
 /* ---------- Shared type and controls ---------- */
@@ -273,6 +263,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   text-decoration-color: var(--hair-strong);
   text-underline-offset: .3em;
 }
+.back-link, .text-link { transition: text-decoration-color .15s ease, color .15s ease; }
 .back-link { margin-bottom: .5rem; }
 .back-link:hover, .text-link:hover { text-decoration-color: currentColor; }
 
@@ -289,7 +280,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   letter-spacing: .08em;
   text-transform: uppercase;
   text-align: center;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s var(--ease-out, ease);
 }
 .button .icon { width: 1.1rem; height: 1.1rem; stroke-width: 2; }
 .button.primary { background: var(--action); color: var(--action-ink); }
@@ -429,7 +420,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .line-name { display: flex; align-items: baseline; gap: .55rem; }
 .line-code { color: var(--muted); font: 600 .95rem/1 var(--display); letter-spacing: .06em; }
 .line-facts { color: var(--muted); font-size: .95rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.line-go { color: var(--muted); }
+.line-go { color: var(--muted); transition: color .15s ease; }
 .line-row:hover .line-go { color: var(--ink); }
 
 .strip { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .6rem; min-width: 0; }
@@ -703,7 +694,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   background: var(--surface);
   line-height: 1.4;
   cursor: pointer;
-  transition: border-color .15s ease, background .15s ease;
+  transition: border-color .15s ease, border-width .15s ease, background .15s ease, translate .2s var(--ease-out, ease);
 }
 .option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .option-letter {
@@ -717,6 +708,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   background: var(--ground);
   color: var(--ink);
   font: 700 .95rem/1 var(--display);
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .option:not(:has(:disabled)):hover { border-color: var(--line); background: var(--surface-2); }
 .option:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
@@ -904,13 +896,17 @@ sub { top: .24em; }
 
 /* Tablet sidebar: dim the page behind it. */
 @media (min-width: 781px) and (max-width: 1099px) {
-  .sidebar-open .app-shell::after {
+  .app-shell::after {
     content: "";
     position: fixed;
     inset: var(--header-h, 4rem) 0 0 0;
     z-index: 2;
     background: rgb(5 9 26 / .55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
   }
+  .sidebar-open .app-shell::after { opacity: 1; pointer-events: auto; }
 }
 
 /* Phones: smaller stations so every zone run fits on one row. */
@@ -1149,9 +1145,6 @@ sub { top: .24em; }
   .header-theme .theme-control button { min-width: 2.5rem; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; animation: none !important; }
-}
 
 /* ---------- Account, sign-in, and the coffee link ---------- */
 .account-chip {
@@ -1193,12 +1186,23 @@ sub { top: .24em; }
 .account-lead { color: var(--muted); font-size: 1rem; line-height: 1.5; }
 .account-fine { color: var(--muted); font-size: .875rem; line-height: 1.45; }
 .account-notice {
-  padding: .85rem 1rem;
+  position: relative;
+  padding: .85rem 1rem .85rem 2.7rem;
   border: 1px solid var(--hair-strong);
-  border-left: 6px solid var(--focus);
   border-radius: 4px;
   background: var(--surface);
   line-height: 1.45;
+}
+.account-notice::before {
+  content: "";
+  position: absolute;
+  top: 1.12rem;
+  left: 1rem;
+  width: .9rem;
+  height: .9rem;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--ground);
 }
 .account-notice strong { overflow-wrap: anywhere; }
 
@@ -1232,6 +1236,7 @@ sub { top: .24em; }
   background: var(--ground);
   color: var(--ink);
   font: 500 1rem/1.2 var(--body);
+  transition: border-color .15s ease, background .15s ease;
 }
 .field-input:hover { border-color: var(--ink); }
 .field-hint { color: var(--muted); font-size: .8rem; }
@@ -1289,4 +1294,213 @@ sub { top: .24em; }
 @media (max-width: 560px) {
   .account-chip { padding: .35rem .65rem; }
   .account-chip [data-account-label] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+
+/* ---------- Motion ----------
+   The student rides the line: pages arrive from the direction of travel, a bar glides along the navigation to the
+   current stop, the network draws itself out from the hub, and an answered question lights its station.
+   Flat world: no shadows, glows or blur. Movement is movement, opacity, clip-path, stroke drawing and colour.
+   The entrance sequences only play while #main[data-motion] names the kind of change (motion.js sets it), so an
+   ordinary re-render never replays one. Everything is visible without them.
+   Under prefers-reduced-motion nothing travels, draws, pops or loops; pages and messages fade and colours ease. */
+
+:root {
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in: cubic-bezier(.7, 0, .84, 0);
+  --ease-io: cubic-bezier(.65, 0, .35, 1);
+}
+
+/* Nothing should snap: every interactive element eases its colour. More specific rules above override this. */
+:where(a, button, summary, label, input, select) {
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease, text-decoration-color .15s ease, opacity .15s ease;
+}
+[data-count] { font-variant-numeric: tabular-nums; }
+
+/* The one bar under the current page in the sidebar and the phone tab bar. */
+.desktop-sidebar nav, .main-nav { position: relative; }
+.nav-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .5s var(--ease-out), opacity .2s ease;
+}
+.nav-bar[data-nav-bar="rail"] { width: 2.25rem; }
+.nav-bar[data-nav-bar="dock"] { width: 1.75rem; }
+
+/* Without View Transitions, every colour still eases through a theme change. */
+.theme-easing, .theme-easing *, .theme-easing *::before, .theme-easing *::after {
+  transition: background-color .4s ease, color .4s ease, border-color .4s ease, fill .4s ease, stroke .4s ease !important;
+}
+
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes rise { from { opacity: 0; translate: 0 12px; } }
+@keyframes rise-sm { from { opacity: 0; translate: 0 8px; } }
+@keyframes pop-in { 0% { opacity: 0; scale: .2; } 60% { opacity: 1; scale: 1.16; } 100% { opacity: 1; scale: 1; } }
+@keyframes pop-sm { 0% { scale: .86; } 55% { scale: 1.1; } 100% { scale: 1; } }
+@keyframes draw { from { stroke-dashoffset: var(--len, 0); } to { stroke-dashoffset: 0; } }
+@keyframes track { from { scale: 0 1; } }
+@keyframes halo-in { from { opacity: 0; scale: .4; } }
+@keyframes ping { from { opacity: .75; scale: 1; } to { opacity: 0; scale: 2.7; } }
+@keyframes unroll { from { opacity: 0; translate: 0 10px; clip-path: inset(0 0 100% 0); } to { opacity: 1; translate: 0 0; clip-path: inset(-12px); } }
+@keyframes page-out { to { opacity: 0; translate: -14px 0; } }
+@keyframes page-out-back { to { opacity: 0; translate: 14px 0; } }
+@keyframes page-in { from { opacity: 0; translate: 28px 0; } }
+@keyframes page-in-back { from { opacity: 0; translate: -28px 0; } }
+@keyframes card-out { to { opacity: 0; translate: -26px 0; } }
+@keyframes card-in { from { opacity: 0; translate: 38px 0; } }
+@keyframes dock-out { to { translate: 0 100%; } }
+@keyframes dock-in { from { translate: 0 100%; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ----- Whole-page transitions (View Transitions) ----- */
+  /* The frame and navigation never animate as one block; only the named parts below move. */
+  ::view-transition-group(root) { animation: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .2s; }
+
+  /* Page to page: the new page rides in from the direction of travel; the old one steps aside. */
+  html[data-vt="route"] #main { view-transition-name: page; }
+  html[data-vt="route"]::view-transition-group(page) { animation: none; }
+  html[data-vt="route"]::view-transition-old(page), html[data-vt="route"]::view-transition-new(page) { mix-blend-mode: normal; }
+  html[data-vt="route"]::view-transition-old(page) { animation: page-out .14s cubic-bezier(.3, 0, .6, 1) both; }
+  html[data-vt="route"]::view-transition-new(page) { animation: page-in .42s var(--ease-out) .05s both; }
+  html[data-vt="route"][data-dir="back"]::view-transition-old(page) { animation-name: page-out-back; }
+  html[data-vt="route"][data-dir="back"]::view-transition-new(page) { animation-name: page-in-back; }
+
+  /* The bar under the current page glides to its new stop. */
+  html[data-vt="route"] .nav-bar[data-nav-bar="rail"] { view-transition-name: nav-rail; transition: none; }
+  html[data-vt="route"] .nav-bar[data-nav-bar="dock"] { view-transition-name: nav-dock; transition: none; }
+  html[data-vt="route"]::view-transition-group(nav-rail), html[data-vt="route"]::view-transition-group(nav-dock) {
+    animation-duration: .5s;
+    animation-timing-function: var(--ease-out);
+  }
+
+  /* The phone tab bar slides away for a round and back when it ends. */
+  html[data-vt="route"] .navigation-dock { view-transition-name: dock; }
+  html[data-vt="route"]::view-transition-group(dock), html[data-vt="route"]::view-transition-group(nav-dock) { overflow: clip; }
+  html[data-vt="route"]::view-transition-old(dock):only-child, html[data-vt="route"]::view-transition-old(nav-dock):only-child { animation: dock-out .3s var(--ease-in) both; }
+  html[data-vt="route"]::view-transition-new(dock):only-child, html[data-vt="route"]::view-transition-new(nav-dock):only-child { animation: dock-in .45s var(--ease-out) both; }
+
+  /* Something changed in place (a level switch, a saved question removed): quick cross-fade, and the page
+     glides to its new height. Rows with a data-flip name glide to their new places. */
+  html[data-vt="update"] #main { view-transition-name: page; }
+  html[data-vt="update"]::view-transition-group(page) { animation-duration: .34s; animation-timing-function: var(--ease-out); }
+  html[data-vt="update"]::view-transition-old(page), html[data-vt="update"]::view-transition-new(page) { mix-blend-mode: normal; }
+  html[data-vt="update"]::view-transition-old(page) { animation: fade-out .16s ease both; }
+  html[data-vt="update"]::view-transition-new(page) { animation: fade-in .3s ease both; }
+  html[data-vt]::view-transition-group(*) { animation-timing-function: var(--ease-out); }
+
+  /* An answer was checked: the card grows to make room, the station lights. */
+  html[data-vt="check"] #main, html[data-vt="step"] #main { view-transition-name: page; }
+  html[data-vt="check"] .quiz-card, html[data-vt="step"] .quiz-card { view-transition-name: card; }
+  html[data-vt="check"] .journey, html[data-vt="step"] .journey { view-transition-name: journey; }
+  html[data-vt="check"]::view-transition-group(card), html[data-vt="step"]::view-transition-group(card) { animation-duration: .36s; animation-timing-function: var(--ease-out); overflow: clip; }
+  html[data-vt="check"]::view-transition-group(journey), html[data-vt="step"]::view-transition-group(journey) { animation-duration: .36s; }
+  html[data-vt="check"]::view-transition-old(page), html[data-vt="step"]::view-transition-old(page) { animation: fade-out .12s ease both; }
+  html[data-vt="check"]::view-transition-new(page), html[data-vt="step"]::view-transition-new(page) { animation: fade-in .2s ease both; }
+  html[data-vt="check"]::view-transition-old(card) { animation: fade-out .14s ease both; }
+  html[data-vt="check"]::view-transition-new(card) { animation: fade-in .22s ease both; }
+  html[data-vt="check"]::view-transition-old(card), html[data-vt="check"]::view-transition-new(card),
+  html[data-vt="step"]::view-transition-old(card), html[data-vt="step"]::view-transition-new(card) { mix-blend-mode: normal; }
+
+  /* On to the next question: the card rides out and the next one rides in, along the same line. */
+  html[data-vt="step"]::view-transition-old(card) { animation: card-out .13s cubic-bezier(.3, 0, .6, 1) both; }
+  html[data-vt="step"]::view-transition-new(card) { animation: card-in .42s var(--ease-out) .09s both; }
+
+  /* The theme change is a circle growing from the button (the clip-path is animated by motion.js). */
+  html[data-vt="theme"]::view-transition-old(root), html[data-vt="theme"]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+  html[data-vt="theme"]::view-transition-old(root) { z-index: 1; }
+  html[data-vt="theme"]::view-transition-new(root) { z-index: 2; }
+
+  /* ----- Entrance choreography: only while the page has just been reached ----- */
+  #main[data-motion="route"] > :not(.practice):not(.next-stop),
+  #main[data-motion="route"] > .practice > *,
+  #main[data-motion="route"] .next-copy > * {
+    animation: rise .6s var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 65ms);
+  }
+  /* On a phone the question is full-bleed with its action pinned to the screen edge: it fades in, it never rises. */
+  @media (max-width: 780px) {
+    #main[data-motion="route"] > .practice > .quiz-card { animation: fade-in .5s ease both; animation-delay: calc(var(--i, 0) * 65ms); }
+  }
+  #main[data-motion="route"] :is(.lines-list > li, .station-row, .syllabus-topic, .activity-list > li, .saved-row, .review-item) {
+    animation: rise-sm .5s var(--ease-out) both;
+    animation-delay: calc(220ms + var(--r, 0) * 45ms);
+  }
+  #main[data-motion="route"] .station-dot {
+    animation: pop-in .5s var(--ease-out) both;
+    animation-delay: calc(300ms + var(--r, 0) * 45ms);
+  }
+
+  /* The network draws itself out from the hub, line by line; each line's stations light as it passes. */
+  #main[data-motion="route"] .net-line {
+    stroke-dasharray: var(--len, none);
+    animation: draw .85s var(--ease-io) both;
+    animation-delay: var(--d, 0ms);
+  }
+  #main[data-motion="route"] :is(.net-station, .net-tick, .net-hub, .net-next-ring) { transform-box: fill-box; transform-origin: center; }
+  #main[data-motion="route"] :is(.net-station, .net-tick) { animation: pop-in .5s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+  #main[data-motion="route"] .net-hub { animation: pop-in .6s var(--ease-out) both; }
+  #main[data-motion="route"] :is(.net-label, .net-branch, .net-zone) { animation: fade-in .7s ease both; animation-delay: .85s; }
+  #main[data-motion="route"] .net-next-ring { animation: pop-in .6s var(--ease-out) 1.15s both; }
+  #main[data-motion="route"] .net-next-label { animation: fade-in .5s ease 1.3s both; }
+  #main[data-motion="route"] .net-halo { animation: halo-in .7s var(--ease-out) 1.3s both, station-breathe 3.2s ease-in-out 2s infinite; }
+
+  /* Station strips fill left to right, row after row. */
+  #main[data-motion="route"] .strip i { animation: pop-in .45s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+
+  /* A round's journey strip: the track draws, then its stations arrive one by one. */
+  #main[data-motion="route"] .journey-line::before { transform-origin: left center; animation: track .7s var(--ease-io) both; }
+  #main[data-motion="route"] .journey-line li { animation: pop-in .45s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+
+  /* ----- A round in progress ----- */
+  .option:has(input:checked):not(:has(:disabled)) .option-letter { animation: pop-sm .32s var(--ease-out); }
+  #main[data-motion="step"] .journey-line .stop-now .station-mark { animation: pop-in .5s var(--ease-out) .1s both; }
+  /* The station just answered lights up; a correct answer sends a ring out along the line. A wrong one just settles. */
+  #main[data-motion="check"] .journey-line li.is-fresh .station-mark { animation: pop-in .5s var(--ease-out) both; }
+  #main[data-motion="check"] .journey-line li.stop-done.is-fresh::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: ping .9s var(--ease-out) .08s both;
+  }
+  #main[data-motion="check"] .feedback { animation: unroll .55s var(--ease-out) both; }
+  #main[data-motion="check"] .feedback h2 .station-mark { animation: pop-in .55s var(--ease-out) .18s both; }
+  #main[data-motion="check"] .feedback > :not(h2) { animation: rise-sm .5s var(--ease-out) .24s both; }
+  #main[data-motion="check"] .option > .station-mark { animation: pop-in .5s var(--ease-out) .12s both; }
+  #main[data-motion="check"] .option-tag { animation: fade-in .4s ease .1s both; }
+
+  /* ----- Touch and hover ----- */
+  .button:active:not(:disabled) { transform: translateY(1px) scale(.985); }
+  .button .icon-arrow, .line-go .icon, .station-go .icon { transition: translate .22s var(--ease-out); }
+  .button:hover:not(:disabled) .icon-arrow, .line-row:hover .line-go .icon, .station-button:hover:not(:disabled) .station-go .icon { translate: 3px 0; }
+  .option:not(:has(:disabled)):hover { translate: 3px 0; }
+  .bookmark-button:active, .theme-control button:active, .level-switch label:active span { scale: .96; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing travels, draws, pops or loops. Pages and messages fade, and colours still ease. */
+  *, *::before, *::after { scroll-behavior: auto !important; }
+  .net-halo { animation: none !important; }
+  #main[data-motion="route"] > :not(.practice):not(.next-stop),
+  #main[data-motion="route"] > .practice > *,
+  #main[data-motion="route"] .next-copy > *,
+  #main[data-motion="route"] .next-map { animation: fade-in .25s ease both; }
+  #main[data-motion="check"] .feedback { animation: fade-in .3s ease both; }
+  html[data-vt] #main { view-transition-name: page; }
+  html[data-vt]::view-transition-group(page) { animation: none; }
+  html[data-vt]::view-transition-old(root), html[data-vt]::view-transition-new(root),
+  html[data-vt]::view-transition-old(page), html[data-vt]::view-transition-new(page) { animation-duration: .18s; }
+  html[data-vt]::view-transition-group(root) { animation: none; }
+  .nav-bar { transition: opacity .2s ease; }
 }

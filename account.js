@@ -6,6 +6,7 @@
 import { supportUrl } from './cloud-config.js';
 import { cloudConfigured, fetchRemote, friendlyError, getClient, hasAuthTraces, removeAccount, saveRemote } from './cloud.js';
 import { mergeProgress, sameProgress } from './merge.js';
+import { setHidden, swapText } from './motion.js';
 
 const ownerKey = 'study-circuit:owner';
 const minPassword = 8;
@@ -190,8 +191,8 @@ export function createAccount(ctx) {
       link.classList.toggle('is-signed-in', signedIn());
     }
     const label = signedIn() || (account.status === 'loading') ? 'Account' : 'Sign in';
-    for (const slot of document.querySelectorAll('[data-account-label]')) slot.textContent = label;
-    for (const slot of document.querySelectorAll('[data-sync-status]')) slot.textContent = syncText();
+    for (const slot of document.querySelectorAll('[data-account-label]')) swapText(slot, label);
+    for (const slot of document.querySelectorAll('[data-sync-status]')) swapText(slot, syncText());
     ctx.showStorage();
   }
 
@@ -339,8 +340,15 @@ export function createAccount(ctx) {
   function showError(scope, text) {
     const slot = scope.querySelector('[data-form-error]');
     if (!slot) return;
-    slot.textContent = text;
-    slot.hidden = !text;
+    // A new message unfolds, a changed one cross-fades, and a cleared one folds away (keeping its words until it has).
+    if (!text) {
+      setHidden(slot, true);
+    } else if (slot.hidden) {
+      slot.textContent = text;
+      setHidden(slot, false);
+    } else {
+      swapText(slot, text);
+    }
   }
 
   async function submitForm(form) {
@@ -456,8 +464,7 @@ export function createAccount(ctx) {
     if (action === 'mode') {
       account.mode = button.dataset.mode;
       account.notice = null;
-      ctx.render();
-      main.querySelector('.account-form input')?.focus();
+      ctx.render().then(() => main.querySelector('.account-form input')?.focus());
     } else if (action === 'sync') {
       runSync({ force: true });
     } else if (action === 'signout') {

@@ -1,6 +1,7 @@
 import { originalRoundNames, questions, subjects, topics } from './questions.js';
 import { richText } from './format.js';
 import { createAccount } from './account.js';
+import * as motion from './motion.js';
 
 const icons = {
   user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
@@ -66,7 +67,7 @@ const account = createAccount({
 });
 
 function icon(name) {
-  return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
+  return `<svg class="icon icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
 }
 
 // lines: null until the student chooses (or skips) the subjects and Maths papers they take.
@@ -167,7 +168,7 @@ function persist({ remote = false } = {}) {
 }
 
 function showStorageStatus() {
-  storageNote.textContent = account.storageText(storageAvailable);
+  motion.swapText(storageNote, account.storageText(storageAvailable));
 }
 
 function shuffle(items) {
@@ -439,7 +440,7 @@ function weakTopicRows(items) {
     const { subject, topic, status } = item;
     const size = levelQuestions(topic.questionIds).length;
     const action = state.drafts[draftKey(topic.id)] ? 'Resume' : 'Practise';
-    return `<li class="syllabus-topic ${subject.id}">
+    return `<li class="syllabus-topic ${subject.id}" data-flip="topic-${topic.id}">
       <span class="topic-number">${topic.number}</span>
       <div class="topic-copy">
         <div class="topic-title-line"><h3>${topic.name}</h3>${statusBadge(status)}</div>
@@ -629,7 +630,9 @@ function heading(title, description, back) {
 function totalsLine() {
   const topicList = mySubjects().flatMap(myTopics);
   const overall = summary([...new Set(topicList.flatMap(topic => topic.questionIds))]);
-  return `${count(overall.answered, 'answer')} · ${accuracy(overall)} correct · ${topicsVisited(topicList)} of ${topicList.length} stations visited`;
+  const climb = number => `<span data-count="${number}">${number}</span>`;
+  const accuracyText = overall.answered ? `${climb(Math.round(overall.correct / overall.answered * 100))}%` : '—';
+  return `${climb(overall.answered)} ${overall.answered === 1 ? 'answer' : 'answers'} · ${accuracyText} correct · ${climb(topicsVisited(topicList))} of ${topicList.length} stations visited`;
 }
 
 function activityRows(limit) {
@@ -852,7 +855,7 @@ function savedPage() {
       </div>
       <ul class="saved-list">${savedQuestions.map(question => {
         const subject = subjectById[question.subjectId];
-        return `<li class="saved-row ${subject.id}">
+        return `<li class="saved-row ${subject.id}" data-flip="saved-${question.id}">
           <div><p class="question-category">${placeLabel(question)} · ${levelName(question.level)}</p><h2>${richText(question.prompt)}</h2></div>
           ${bookmarkButton(question.id, true)}
         </li>`;
@@ -995,7 +998,8 @@ function journey(round, checked = false, finished = false, place = '') {
     <ol class="journey-line" aria-hidden="true" style="--stops: ${total}">${round.ids.map((id, index) => {
       const answered = Object.hasOwn(round.answers, id) && (finished || index < round.index || (index === round.index && checked));
       const kind = answered ? (questionCorrect(questions[id], round.answers[id]) ? 'done' : 'miss') : index === round.index && !finished ? 'now' : 'open';
-      return `<li class="stop-${kind}">${stationMark(kind)}</li>`;
+      const fresh = checked && !finished && index === round.index ? ' is-fresh' : '';
+      return `<li class="stop-${kind}${fresh}">${stationMark(kind)}</li>`;
     }).join('')}</ol>${legend}</div>`;
 }
 
@@ -1043,7 +1047,7 @@ function resultsPage() {
   return `<div class="practice">
     ${heading('Practice complete', roundName(round.kind), { href: '#/', label: 'Overview' })}
     <section class="result-card" aria-labelledby="result-heading">
-      <h2 id="result-heading" class="result-heading">${round.correct} of ${round.ids.length} correct</h2>
+      <h2 id="result-heading" class="result-heading"><span data-count="${round.correct}" data-delay="520">${round.correct}</span> of ${round.ids.length} correct</h2>
       <div class="result-copy">${journey(round, false, true)}<p>${nextLine.trim() || summaryLine}</p></div>
       <div class="result-actions">
         ${retryable.length ? `<button class="button primary" type="button" data-action="start" data-kind="${retryKind}">Retry the ${retryable.length === 1 ? 'one' : retryable.length} you missed</button>` : ''}
@@ -1075,7 +1079,37 @@ function resultsPage() {
   </div>`;
 }
 
-function render(focus = false) {
+// Where a page sits along the journey, so the new page can arrive from the direction of travel:
+// tabs run in navigation order, a subject sits just past Subjects, and a round sits past them all.
+const routeOrder = { '': 0, subjects: 1, progress: 2, saved: 3, account: 4, practice: 5, results: 6 };
+let lastRoute = null;
+
+function routeRank(hash) {
+  const [, section = '', sub = ''] = hash.slice(1).split('/');
+  return (routeOrder[section] ?? 0) + (sub ? 0.5 : 0);
+}
+
+// kind: 'check' (an answer was checked), 'step' (on to the next question); otherwise it is worked out here:
+// a different page is a 'route', anything else on the same page is a quiet 'update'.
+// Returns a promise that resolves once the page has been redrawn (View Transitions draw it a frame later).
+function render(focus = false, kind) {
+  const hash = location.hash;
+  const [, section = '', sub = ''] = hash.slice(1).split('/');
+  const key = `${section}/${sub}`;
+  const first = lastRoute === null;
+  const moved = !first && key !== lastRoute.key;
+  const dir = moved && routeRank(hash) < lastRoute.rank ? 'back' : 'forward';
+  lastRoute = { key, rank: routeRank(hash) };
+  const motionKind = kind ?? (first || moved ? 'route' : 'update');
+  const apply = () => paint(focus, motionKind);
+  if (first) {
+    apply();
+    return Promise.resolve();
+  }
+  return motion.run(apply, { kind: motionKind, dir });
+}
+
+function paint(focus, motionKind) {
   const [, section, subjectId] = location.hash.slice(1).split('/');
   const subject = Object.hasOwn(subjectById, subjectId) ? subjectById[subjectId] : null;
   let active = section;
@@ -1133,6 +1167,8 @@ function render(focus = false) {
     window.scrollTo(0, 0);
     main.querySelector('[data-page-title]')?.focus({ preventScroll: true });
   }
+  motion.settle(main, motionKind);
+  motion.moveBars();
 }
 
 function navForRound(kind) {
@@ -1199,7 +1235,7 @@ function submitAnswer() {
     ? question.parts.some((_, index) => !Number.isFinite(numericValue(selected?.[index])))
     : !Number.isInteger(selected) || !question.options[selected];
   if (invalid) {
-    document.querySelector('#selection-error').hidden = false;
+    motion.setHidden(document.querySelector('#selection-error'), false);
     main.querySelector(question.parts ? '[data-part]' : 'input[name="answer"]').focus();
     return;
   }
@@ -1210,11 +1246,12 @@ function submitAnswer() {
   attempt.correct += Number(questionCorrect(question, selected));
   state.attempts[id] = attempt;
   persist();
-  render();
-  // Move focus to the result without yanking the round header off screen; scroll only if the feedback is hidden.
-  const feedbackTitle = document.querySelector('#feedback-title');
-  feedbackTitle?.focus({ preventScroll: true });
-  feedbackTitle?.closest('.feedback')?.scrollIntoView({ block: 'nearest' });
+  render(false, 'check').then(() => {
+    // Move focus to the result without yanking the round header off screen; scroll only if the feedback is hidden.
+    const feedbackTitle = document.querySelector('#feedback-title');
+    feedbackTitle?.focus({ preventScroll: true });
+    feedbackTitle?.closest('.feedback')?.scrollIntoView({ block: 'nearest', behavior: motion.reduced() ? 'auto' : 'smooth' });
+  });
 }
 
 function advance() {
@@ -1224,7 +1261,7 @@ function advance() {
     round.index += 1;
     round.selected = null;
     persist();
-    render(true);
+    render(true, 'step');
     return;
   }
 
@@ -1245,11 +1282,11 @@ function toggleSaved(button) {
   persist();
   announcement.textContent = isSaved ? 'Question removed from saved questions.' : 'Question saved for review.';
   if (location.hash === '#/saved') {
-    render();
-    (main.querySelector('[data-action="bookmark"]') ?? main.querySelector('h1')).focus();
+    render().then(() => (main.querySelector('[data-action="bookmark"]') ?? main.querySelector('h1')).focus());
   } else {
     button.setAttribute('aria-pressed', String(!isSaved));
     button.querySelector('svg').outerHTML = icon(isSaved ? 'bookmark' : 'bookmarkFilled');
+    motion.pop(button.querySelector('svg'));
   }
 }
 
@@ -1264,13 +1301,14 @@ for (const slot of document.querySelectorAll('[data-theme-slot]')) {
 applyTheme(readTheme());
 darkQuery.addEventListener('change', () => applyTheme(readTheme()));
 document.addEventListener('click', event => {
-  const choice = event.target.closest('[data-theme-choice]')?.dataset.themeChoice;
+  const themeButton = event.target.closest('[data-theme-choice]');
+  const choice = themeButton?.dataset.themeChoice;
   if (!choice) return;
   try {
     if (choice === 'system') localStorage.removeItem(themeKey);
     else localStorage.setItem(themeKey, choice);
   } catch { /* storage blocked: the choice lasts for this visit */ }
-  applyTheme(choice);
+  motion.themeSwap(() => applyTheme(choice), themeButton);
   announcement.textContent = choice === 'system' ? 'Theme now matches your device.' : `${choice === 'dark' ? 'Dark' : 'Light'} theme on.`;
 });
 
@@ -1371,28 +1409,28 @@ main.addEventListener('input', event => {
   if (!round || Object.hasOwn(round.answers, round.ids[round.index])) return;
   if (!Array.isArray(round.selected)) round.selected = [];
   round.selected[Number(event.target.dataset.part)] = event.target.value.replaceAll('−', '-');
-  document.querySelector('#selection-error').hidden = true;
+  motion.setHidden(document.querySelector('#selection-error'), true);
   persist();
 });
 
 main.addEventListener('change', event => {
   if (event.target.matches('input[name="line"]')) {
     const form = event.target.form;
-    form.querySelector('#lines-error').hidden = true;
-    if (event.target.value === 'mathematics') form.querySelector('.paper-picker').hidden = !event.target.checked;
+    motion.setHidden(form.querySelector('#lines-error'), true);
+    if (event.target.value === 'mathematics') motion.setHidden(form.querySelector('.paper-picker'), !event.target.checked);
     return;
   }
   if (event.target.matches('input[name="practice-level"]')) {
     state.level = event.target.value === 'challenge' ? 'challenge' : 'simple';
     persist();
-    render();
-    main.querySelector('input[name="practice-level"]:checked')?.focus({ preventScroll: true });
+    // The page is redrawn a frame later, so keyboard focus goes back to the chosen radio once it exists.
+    render().then(() => main.querySelector('input[name="practice-level"]:checked')?.focus({ preventScroll: true }));
     announcement.textContent = levelName(state.level) + ' practice selected.';
     return;
   }
   if (event.target.matches('input[name="answer"]') && currentDraft()) {
     currentDraft().selected = Number(event.target.value);
-    document.querySelector('#selection-error').hidden = true;
+    motion.setHidden(document.querySelector('#selection-error'), true);
     persist();
   }
 });
@@ -1400,7 +1438,7 @@ main.addEventListener('change', event => {
 function saveLines(form) {
   const chosen = [...form.querySelectorAll('input[name="line"]:checked')].map(input => input.value);
   if (!chosen.length) {
-    form.querySelector('#lines-error').hidden = false;
+    motion.setHidden(form.querySelector('#lines-error'), false);
     form.querySelector('input[name="line"]').focus();
     return;
   }
@@ -1424,6 +1462,7 @@ main.addEventListener('submit', event => {
 });
 
 window.addEventListener('hashchange', () => render(true));
+motion.init();
 syncRail();
 showStorageStatus();
 account.start();
