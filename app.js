@@ -2,6 +2,8 @@ import { originalRoundNames, questions, subjects, topics } from './questions.js'
 import { richText } from './format.js';
 import { createAccount } from './account.js';
 import { createWelcome, heardIds, skippedAnswer } from './welcome.js';
+import { numericHint } from './hints.js';
+import * as why from './why.js';
 import * as motion from './motion.js';
 
 const icons = {
@@ -934,6 +936,13 @@ function figuresNeeded(part) {
   return 0;
 }
 
+// For a wrong numeric part: what the numbers show about the slip, when that is clear (see hints.js).
+function partHint(part, value) {
+  if (correctPart(part, value)) return '';
+  const hint = numericHint(part.answer, numericValue(value), figuresNeeded(part));
+  return hint ? `<p class="part-hint">${hint}</p>` : '';
+}
+
 function numericParts(question, response, checked) {
   const figures = Math.max(0, ...question.parts.map(figuresNeeded));
   const hint = figures ? ` Give each answer to at least ${figures} significant figures, or as an exact fraction.` : '';
@@ -941,7 +950,36 @@ function numericParts(question, response, checked) {
   return `<legend>Enter a number or fraction for each part.${hint}</legend>${question.parts.map((part, i) =>
     `<label class="numeric-part"><span><strong>(${'abc'[i]})</strong> ${richText(part.label)}</span>
       <span><input type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" data-part="${i}" value="${escapeText(response?.[i] ?? '')}"> ${richText(part.unit)}</span></label>
-      ${checked ? `<p class="part-result">${correctPart(part, response[i]) ? `${stationMark('done')}Correct` : `${stationMark('miss')}Expected ${formatAnswer(part.answer)} ${richText(part.unit)}`}</p>` : ''}`).join('')}`;
+      ${checked ? `<p class="part-result">${correctPart(part, response[i]) ? `${stationMark('done')}Correct` : `${stationMark('miss')}Expected ${formatAnswer(part.answer)} ${richText(part.unit)}`}</p>${partHint(part, response[i])}` : ''}`).join('')}`;
+}
+
+// ---------- Teaching notes: why the option the student picked is wrong, and why the others are (see why.js) ----------
+const letters = 'ABCD';
+const countWords = ['none', 'one', 'two', 'three', 'four'];
+
+// The notes load on their own; if they arrive after the answer was checked, the page is redrawn once to show them.
+function showNotesWhenLoaded(subjectId, stillShown) {
+  if (why.ready(subjectId)) return;
+  why.warm(subjectId).then(() => {
+    if (why.ready(subjectId) && stillShown()) render(false, 'update');
+  });
+}
+
+// Right after a wrong answer: why that option is wrong.
+function chosenNote(question, selected) {
+  const notes = why.notesFor(question);
+  return notes?.[selected] ? `<p class="why-wrong"><strong>You chose ${letters[selected]}.</strong> ${richText(notes[selected])}</p>` : '';
+}
+
+// Under the explanation, folded away: why each of the remaining wrong options is wrong.
+function otherNotes(question, selected) {
+  const notes = why.notesFor(question);
+  const rows = (notes ?? []).map((note, index) => ({ note, index })).filter(({ note, index }) => note != null && index !== selected);
+  if (!rows.length) return '';
+  const heading = `Why the other ${countWords[rows.length]} ${rows.length === 1 ? 'is' : 'are'} wrong`;
+  return `<details class="why-others"><summary>${heading}${icon('chevron')}</summary>
+    <ul class="why-list">${rows.map(({ note, index }) => `<li><span class="why-letter" aria-hidden="true">${letters[index]}</span><span><span class="sr-only">Option ${letters[index]}: </span>${richText(note)}</span></li>`).join('')}</ul>
+  </details>`;
 }
 
 function quizPage() {
@@ -954,6 +992,11 @@ function quizPage() {
   const isCorrect = checked && questionCorrect(question, selected);
   const subject = subjectById[question.subjectId];
   const last = round.index + 1 === round.ids.length;
+  if (!question.parts) {
+    // Start fetching this subject's notes while the student reads; if they are still on their way at check time, redraw when they land.
+    if (!checked) why.warm(question.subjectId);
+    else showNotesWhenLoaded(question.subjectId, () => location.hash === '#/practice' && currentDraft()?.ids[currentDraft().index] === question.id && Object.hasOwn(currentDraft().answers, question.id));
+  }
 
   return `<div class="practice ${subject.id}">
     <header class="practice-header">
@@ -988,8 +1031,10 @@ function quizPage() {
         <p class="selection-error" id="selection-error" hidden role="alert">${question.parts ? 'Enter a valid number or fraction for every part.' : 'Select an answer before checking.'}</p>
         ${checked ? `<div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">
           <h2 id="feedback-title" tabindex="-1">${stationMark(isCorrect ? 'done' : 'miss')}${isCorrect ? 'Correct' : 'Incorrect'}</h2>
-          ${isCorrect || question.parts ? '' : `<p class="correct-answer">Correct answer: ${richText(question.options[question.answer])}</p>`}
+          ${isCorrect || question.parts ? '' : chosenNote(question, selected)}
+          ${isCorrect || question.parts ? '' : `<p class="correct-answer">Correct answer: ${letters[question.answer]}. ${richText(question.options[question.answer])}</p>`}
           <p>${richText(question.explanation)}</p>
+          ${question.parts ? '' : otherNotes(question, selected)}
           ${!isCorrect && !topicById[round.kind] ? topicFollowUp(question) : ''}
         </div>` : ''}
         <div class="quiz-actions">${checked
@@ -1033,9 +1078,18 @@ function missedIds(round) {
   return round.ids.filter(id => !questionCorrect(questions[id], round.answers[id]));
 }
 
+// In the review: why the option the student picked was wrong, when there is a note for it.
+function reviewNote(item, selected) {
+  const notes = why.notesFor(item);
+  return notes?.[selected] ? `<p><strong>Why that is wrong:</strong> ${richText(notes[selected])}</p>` : '';
+}
+
 function resultsPage() {
   const round = state.history[0];
   if (!round) return emptyRound('Practice results', 'Complete a practice round to see your results.');
+  for (const subjectId of new Set(round.ids.filter(id => !questions[id].parts).map(id => questions[id].subjectId))) {
+    showNotesWhenLoaded(subjectId, () => location.hash === '#/results');
+  }
 
   const missed = missedIds(round);
   const retryable = missed.filter(id => currentQuestionIds.has(id));
@@ -1088,8 +1142,8 @@ function resultsPage() {
           </summary>
           <div class="review-copy">
             ${renderFigure(item.figure)}
-            ${item.parts ? item.parts.map((part, i) => `<p><strong>(${'abc'[i]}) ${richText(part.label)}</strong><br>Your answer: ${escapeText(round.answers[id][i])} ${richText(part.unit)} · Expected: ${formatAnswer(part.answer)} ${richText(part.unit)}</p>`).join('') : `<p><strong>Your answer:</strong> ${richText(item.options[round.answers[id]])}</p>
-            ${correct ? '' : `<p><strong>Correct answer:</strong> ${richText(item.options[item.answer])}</p>`}`}
+            ${item.parts ? item.parts.map((part, i) => `<p><strong>(${'abc'[i]}) ${richText(part.label)}</strong><br>Your answer: ${escapeText(round.answers[id][i])} ${richText(part.unit)} · Expected: ${formatAnswer(part.answer)} ${richText(part.unit)}</p>${partHint(part, round.answers[id][i])}`).join('') : `<p><strong>Your answer:</strong> ${richText(item.options[round.answers[id]])}</p>
+            ${correct ? '' : `${reviewNote(item, round.answers[id])}<p><strong>Correct answer:</strong> ${richText(item.options[item.answer])}</p>`}`}
             <p>${richText(item.explanation)}</p>
           </div>
         </details>`;
