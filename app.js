@@ -307,7 +307,8 @@ function stationsAlong(route, topicList, offset) {
 const routePath = route => route.map(([x, y], index) => `${index ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 
 // preview: the greeting's map. Every subject and all six Maths papers are drawn, each waiting as a dotted track, and the
-// greeting lights the ones the student picks. Its elements carry the paper they belong to, and nothing in it is a link.
+// greeting lights the ones the student picks. It is a picture only: no names, no links, and its elements carry the paper
+// they belong to.
 function networkMap(nextTopicId, { list = mySubjects(), papers = takenPapers(), preview = false } = {}) {
   const parts = [];
   const stations = [];
@@ -329,10 +330,10 @@ function networkMap(nextTopicId, { list = mySubjects(), papers = takenPapers(), 
         track(subject.id, branch, index + 1);
         const topicList = section.groups.flatMap(group => group.topics);
         stations.push(...stationsAlong(branch, topicList, index ? 34 : 26).map(item => ({ ...item, subject, paper: index + 1 })));
-        labels.push(`<text class="net-branch ${subject.id}"${preview ? ` data-paper="${index + 1}"` : ''} x="86" y="${y + 5}" text-anchor="end">P${index + 1}</text>`);
+        if (!preview) labels.push(`<text class="net-branch ${subject.id}" x="86" y="${y + 5}" text-anchor="end">P${index + 1}</text>`);
       });
       const lastBranch = Math.max(...papers.map(Number)) - 1;
-      labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="62" y="${mathsJunction[1] + (lastBranch + 1) * 30 + 18}">${subject.name} ${subject.code}</text>`));
+      if (!preview) labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="62" y="${mathsJunction[1] + (lastBranch + 1) * 30 + 18}">${subject.name} ${subject.code}</text>`));
       continue;
     }
     const route = lineRoutes[subject.id];
@@ -353,7 +354,7 @@ function networkMap(nextTopicId, { list = mySubjects(), papers = takenPapers(), 
     const anchor = subject.id === 'physics' ? 'start' : 'end';
     const lx = subject.id === 'chemistry' ? ex - 16 : ex;
     const ly = subject.id === 'biology' ? ey + 30 : subject.id === 'chemistry' ? ey + 6 : ey - 18;
-    labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="${lx}" y="${ly}" text-anchor="${anchor}">${subject.name} ${subject.code}</text>`));
+    if (!preview) labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="${lx}" y="${ly}" text-anchor="${anchor}">${subject.name} ${subject.code}</text>`));
   }
   // Unvisited stations are small ticks on the line; visited ones are lit rings; the next stop is named.
   let next = '';
@@ -610,20 +611,29 @@ function linesSummary() {
 
 // The chooser: subject line chips as toggles; Maths opens its six papers.
 // mode 'welcome' is the greeting's question (with a way on and a way to skip); 'edit' is the Subjects page's.
-function lineChooser(mode) {
+// The greeting keeps its words to a minimum: no course codes, and the six papers are bare "P1" to "P6" chips
+// (their full names are spoken to screen readers) in a slot that is always reserved, so choosing Maths fades them
+// in without moving anything. `between` is drawn above the buttons (the greeting puts its map there).
+function lineChooser(mode, between = '') {
   const greeting = mode === 'welcome';
   const chosen = state.lines && !state.lines.skipped ? state.lines.subjects : [];
   const papers = state.lines?.papers ?? [];
   const maths = subjectById.mathematics;
+  const paperName = section => escapeText(section.name.split(' · ')[1] ?? section.name);
+  const paperToggle = (section, index) => greeting
+    ? `<label class="paper-toggle" title="${paperName(section)}"><input type="checkbox" name="paper" value="${index + 1}" aria-label="Paper ${index + 1}, ${paperName(section)}"${papers.includes(String(index + 1)) ? ' checked' : ''}><span><b>P${index + 1}</b></span></label>`
+    : `<label class="paper-toggle"><input type="checkbox" name="paper" value="${index + 1}"${papers.includes(String(index + 1)) ? ' checked' : ''}><span><b>P${index + 1}</b> ${paperName(section)}</span></label>`;
+  const picked = chosen.includes('mathematics');
   return `<form class="line-chooser${greeting ? ' welcome-chooser' : ''}" data-line-chooser="${mode}" novalidate>
     <fieldset><legend>${greeting ? 'Which subjects do you take?' : 'Subjects you take'}</legend>
-      <div class="chooser-lines">${subjects.map(subject => `<label class="line-toggle ${subject.id}"><input type="checkbox" name="line" value="${subject.id}"${chosen.includes(subject.id) ? ' checked' : ''}><span class="line-toggle-name">${subject.name}</span><span class="line-toggle-code">${subject.code}</span></label>`).join('')}</div>
+      <div class="chooser-lines">${subjects.map(subject => `<label class="line-toggle ${subject.id}"><input type="checkbox" name="line" value="${subject.id}"${chosen.includes(subject.id) ? ' checked' : ''}><span class="line-toggle-name">${subject.name}</span>${greeting ? '' : `<span class="line-toggle-code">${subject.code}</span>`}</label>`).join('')}</div>
     </fieldset>
-    <fieldset class="paper-picker mathematics"${chosen.includes('mathematics') ? '' : ' hidden'}><legend>Maths papers you take</legend>
-      <div class="chooser-papers">${maths.syllabus.sections.map((section, index) => `<label class="paper-toggle"><input type="checkbox" name="paper" value="${index + 1}"${papers.includes(String(index + 1)) ? ' checked' : ''}><span><b>P${index + 1}</b> ${escapeText(section.name.split(' · ')[1] ?? section.name)}</span></label>`).join('')}</div>
-      <p class="chooser-hint">Pick none and all six papers count.</p>
+    <fieldset class="paper-picker mathematics${greeting && !picked ? ' is-off' : ''}"${greeting || picked ? '' : ' hidden'}><legend>${greeting ? 'Maths papers (optional)' : 'Maths papers you take'}</legend>
+      <div class="chooser-papers">${maths.syllabus.sections.map(paperToggle).join('')}</div>
+      ${greeting ? '' : '<p class="chooser-hint">Pick none and all six papers count.</p>'}
     </fieldset>
     <p class="selection-error" id="lines-error" hidden role="alert">Choose at least one subject${greeting ? ', or skip for now' : ''}.</p>
+    ${between}
     <div class="chooser-actions">
       <button type="submit" class="button primary">${greeting ? 'Continue' : 'Save my lines'}${icon('arrow')}</button>
       ${greeting ? '<button type="button" class="button secondary" data-action="skip-lines">Skip for now</button>' : ''}
@@ -1435,7 +1445,12 @@ main.addEventListener('change', event => {
   if (event.target.matches('input[name="line"]')) {
     const form = event.target.form;
     motion.setHidden(form.querySelector('#lines-error'), true);
-    if (event.target.value === 'mathematics') motion.setHidden(form.querySelector('.paper-picker'), !event.target.checked);
+    if (event.target.value === 'mathematics') {
+      const picker = form.querySelector('.paper-picker');
+      // The greeting's papers keep their place and fade in; elsewhere the picker unfolds.
+      if (form.dataset.lineChooser === 'welcome') picker.classList.toggle('is-off', !event.target.checked);
+      else motion.setHidden(picker, !event.target.checked);
+    }
     welcome.sync(form);
     return;
   }

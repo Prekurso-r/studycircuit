@@ -75,39 +75,42 @@ export function createWelcome(ctx) {
     if (next !== null && next !== location.hash) history.replaceState(null, '', next);
   }
 
-  const blurb = 'Original practice for Cambridge AS &amp; A Level, one syllabus topic at a time.';
+  // The map sits between the choices and the buttons, so a choice and its line are seen together.
+  const map = () => `<div class="next-map">${networkMap(null, { list: subjects, papers: paperNumbers, preview: true })}</div>`;
+
+  // Two stations on a short line: where the student is in the greeting. Drawn, not written (screen readers get the words).
+  const progress = step => `<p class="welcome-steps"><span class="sr-only">Step ${step} of 2</span><i class="${step === 1 ? 'is-now' : 'is-done'}" aria-hidden="true"></i><b aria-hidden="true"></b><i class="${step === 2 ? 'is-now' : ''}" aria-hidden="true"></i></p>`;
 
   function subjectsStep() {
     return `<div class="next-copy">
       <h1 class="next-heading" id="welcome-heading" data-page-title tabindex="-1"><span class="next-name">Welcome to Study Circuit</span></h1>
-      <p class="next-meta"><span class="next-meta-text"><strong class="next-tag">Step 1 of 2</strong> ·&nbsp;${blurb}</span></p>
-      ${lineChooser('welcome')}
+      ${lineChooser('welcome', map())}
+      ${progress(1)}
     </div>`;
   }
 
   function heardStep() {
-    const lead = throughSubjects ? 'Step 2 of 2' : 'One quick question';
     return `<div class="next-copy">
       <h1 class="next-heading" id="welcome-heading" data-page-title tabindex="-1"><span class="next-name">How did you hear about us?</span></h1>
-      <p class="next-meta"><span class="next-meta-text"><strong class="next-tag">${lead}</strong> ·&nbsp;One tap, no name or email. It tells us where students find Study Circuit.</span></p>
       <form class="heard-form" data-heard-form novalidate>
         <fieldset>
           <legend class="sr-only">How did you hear about Study Circuit?</legend>
           <div class="heard-options">${heardOptions.map(([id, label]) => `<label class="heard-option"><input type="radio" name="heard" value="${id}"><span>${label}</span></label>`).join('')}</div>
         </fieldset>
+        ${map()}
         <div class="chooser-actions">
           <button type="submit" class="button primary">Start studying${icon('arrow')}</button>
           <button type="button" class="button secondary" data-action="skip-heard">Skip</button>
           ${throughSubjects ? '<a class="back-link" href="#/welcome">Back</a>' : ''}
         </div>
       </form>
+      ${throughSubjects ? progress(2) : ''}
     </div>`;
   }
 
   function page(sub) {
-    return `<section class="next-stop welcome-stop" aria-labelledby="welcome-heading">
+    return `<section class="next-stop welcome-stop${sub === 'heard' ? ' is-survey' : ''}" aria-labelledby="welcome-heading">
       ${sub === 'heard' ? heardStep() : subjectsStep()}
-      <div class="next-map">${networkMap(null, { list: subjects, papers: paperNumbers, preview: true })}</div>
     </section>`;
   }
 
@@ -134,7 +137,7 @@ export function createWelcome(ctx) {
 
   function light(svg, ids, papers, instant) {
     if (instant) svg.classList.add('is-setting');
-    for (const element of svg.querySelectorAll('.net-line, .net-tick, .net-station, .net-label, .net-branch')) {
+    for (const element of svg.querySelectorAll('.net-line, .net-tick, .net-station')) {
       const paper = element.dataset.paper;
       element.classList.toggle('is-on', ids.has(lineOf(element)) && (!paper || papers.includes(paper)));
     }
