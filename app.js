@@ -1,7 +1,10 @@
 import { originalRoundNames, questions, subjects, topics } from './questions.js';
 import { richText } from './format.js';
+import { createAccount } from './account.js';
 
 const icons = {
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
+  coffee: '<path d="M4 9h12.5v4.5a5.5 5.5 0 0 1-5.5 5.5H9.5A5.5 5.5 0 0 1 4 13.5Zm12.5 1H18a2.5 2.5 0 0 1 0 5h-1.5M8 3v3m4-3v3"/>',
   brand: '<path d="M2.5 12h6.3m6.4 0h6.3M5 20.5l4.7-6.1m4.6-4.8L19 3.5"/><circle cx="12" cy="12" r="3.3"/>',
   arrow: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2m0 14.6v2.2M4.6 4.6l1.6 1.6m11.6 11.6 1.6 1.6M2.5 12h2.2m14.6 0h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',
@@ -56,45 +59,76 @@ const levelHints = {
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 let storageAvailable = true;
 const state = restoreState();
+const account = createAccount({
+  main, state, blankState, cleanState, replaceState, icon, heading, render, announce: text => { announcement.textContent = text; },
+  persistRemote: () => persist({ remote: true }),
+  showStorage: () => showStorageStatus(),
+});
 
 function icon(name) {
   return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
 }
 
+// lines: null until the student chooses (or skips) the subjects and Maths papers they take.
+// updatedAt: when the student last changed anything here, so two devices can tell which copy is newer.
+function blankState() {
+  return { version: 1, level: 'simple', attempts: {}, saved: [], drafts: {}, active: null, history: [], lines: null, updatedAt: 0 };
+}
+
+function cleanAttempts(value) {
+  const clean = {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return clean;
+  for (const [id, attempt] of Object.entries(value)) {
+    if (Number.isInteger(attempt?.answered) && Number.isInteger(attempt?.correct) && attempt.answered >= 0 && attempt.correct >= 0) {
+      clean[id] = { answered: attempt.answered, correct: attempt.correct };
+    }
+  }
+  return clean;
+}
+
+// Turns saved progress (from this device or from the student's account) into a safe, current state.
+// Returns null for something this version cannot read.
+function cleanState(savedState) {
+  const initial = blankState();
+  if (!savedState || typeof savedState !== 'object' || savedState.version !== initial.version) return null;
+  const { edition, ...saved } = savedState;
+  // Fill in anything an older or damaged save is missing, so one bad field never breaks the app.
+  const progress = { ...initial };
+  for (const key of Object.keys(initial)) {
+    const value = saved[key];
+    if (value !== undefined && typeof value === typeof initial[key] && Array.isArray(value) === Array.isArray(initial[key])) progress[key] = value;
+  }
+  if (typeof saved.active === 'string') progress.active = saved.active;
+  progress.lines = cleanLines(saved.lines);
+  progress.attempts = cleanAttempts(saved.attempts);
+  progress.updatedAt = Number.isFinite(saved.updatedAt) ? saved.updatedAt : 0;
+  expandPhysicsDrafts(progress.drafts, progress.attempts);
+  keepCurrentSyllabus(progress);
+  // A past round whose questions no longer exist cannot be shown on Results; drop it.
+  progress.history = progress.history.filter(round => Array.isArray(round?.ids) && round.ids.every(id => Object.hasOwn(questions, id)));
+  return { ...progress, level: progress.level === 'challenge' ? 'challenge' : 'simple' };
+}
+
 function restoreState() {
-  // lines: null until the student chooses (or skips) the subjects and Maths papers they take.
-  const initial = { version: 1, level: 'simple', attempts: {}, saved: [], drafts: {}, active: null, history: [], lines: null };
   let raw;
   try {
     raw = localStorage.getItem(storageKey);
   } catch {
     storageAvailable = false;
   }
-
   if (raw) {
     try {
-      const savedState = JSON.parse(raw);
-      if (savedState.version === initial.version) {
-        const { edition, ...saved } = savedState;
-        // Fill in anything an older or damaged save is missing, so one bad field never breaks the app.
-        const progress = { ...initial };
-        for (const key of Object.keys(initial)) {
-          const value = saved[key];
-          if (value !== undefined && typeof value === typeof initial[key] && Array.isArray(value) === Array.isArray(initial[key])) progress[key] = value;
-        }
-        if (typeof saved.active === 'string') progress.active = saved.active;
-        progress.lines = cleanLines(saved.lines);
-        expandPhysicsDrafts(progress.drafts, progress.attempts);
-        keepCurrentSyllabus(progress);
-        // A past round whose questions no longer exist cannot be shown on Results; drop it.
-        progress.history = progress.history.filter(round => Array.isArray(round?.ids) && round.ids.every(id => Object.hasOwn(questions, id)));
-        return { ...progress, level: progress.level === 'challenge' ? 'challenge' : 'simple' };
-      }
-    } catch {
-      return initial;
-    }
+      const restored = cleanState(JSON.parse(raw));
+      if (restored) return restored;
+    } catch { /* damaged save: start fresh */ }
   }
-  return initial;
+  return blankState();
+}
+
+// Swap in a different copy of the progress without replacing the object everything else points at.
+function replaceState(next) {
+  for (const key of Object.keys(state)) delete state[key];
+  Object.assign(state, next);
 }
 
 // Saved questions and unfinished rounds from older syllabus topics are dropped on load.
@@ -119,7 +153,9 @@ function keepCurrentSyllabus(progress) {
   }
 }
 
-function persist() {
+// remote: true when the change came from the student's account, not from the student, so it is not "new" work to upload.
+function persist({ remote = false } = {}) {
+  if (!remote) state.updatedAt = Date.now();
   try {
     localStorage.setItem(storageKey, JSON.stringify(state));
     storageAvailable = true;
@@ -127,12 +163,11 @@ function persist() {
     storageAvailable = false;
   }
   showStorageStatus();
+  if (!remote) account.scheduleSync();
 }
 
 function showStorageStatus() {
-  storageNote.textContent = storageAvailable
-    ? 'Progress is saved on this device.'
-    : 'Progress is available for this visit only.';
+  storageNote.textContent = account.storageText(storageAvailable);
 }
 
 function shuffle(items) {
@@ -681,7 +716,8 @@ function overview() {
     <section class="content-section" aria-labelledby="activity-heading">
       <div class="section-heading"><h2 id="activity-heading">Recent practice</h2><a class="text-link" href="#/progress">View progress</a></div>
       ${activityRows(3)}
-    </section>`}`;
+    </section>`}
+    <p class="support-line">Study Circuit is free. <a class="text-link" href="https://www.buymeacoffee.com/dexoisalbep" target="_blank" rel="noopener noreferrer">Buy me a coffee<span class="sr-only"> (opens in a new tab)</span></a></p>`;
 }
 
 // Shown until the first answer: the three stops of using the app, drawn as a short line.
@@ -693,7 +729,7 @@ function firstSteps() {
       <li><span class="step-number" aria-hidden="true">2</span><p><strong>Answer, then read the explanation</strong> that follows every question.</p></li>
       <li><span class="step-number" aria-hidden="true">3</span><p><strong>Watch your stations light up.</strong> After ${statusMinimum} answers a topic shows Needs work, Getting there or Secure, and your weakest become your next stop.</p></li>
     </ol>
-    ${storageAvailable ? '<p class="first-steps-note">Your progress is saved on this device. No account needed.</p>' : ''}
+    ${storageAvailable ? `<p class="first-steps-note">${account.hint()}</p>` : ''}
   </section>`;
 }
 
@@ -1058,6 +1094,10 @@ function render(focus = false) {
       content = savedPage();
       title = 'Saved questions';
       break;
+    case 'account':
+      content = account.page();
+      title = 'Account';
+      break;
     case 'practice':
       content = quizPage();
       title = 'Practice';
@@ -1084,7 +1124,7 @@ function render(focus = false) {
     previousProgress.value = nextValue;
   }
   document.title = `Study Circuit · ${title}`;
-  document.body.dataset.route = ['subjects', 'progress', 'saved', 'practice', 'results'].includes(section) ? section : 'overview';
+  document.body.dataset.route = ['subjects', 'progress', 'saved', 'practice', 'results', 'account'].includes(section) ? section : 'overview';
   for (const link of navLinks) {
     if (link.dataset.nav === active) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
@@ -1386,4 +1426,5 @@ main.addEventListener('submit', event => {
 window.addEventListener('hashchange', () => render(true));
 syncRail();
 showStorageStatus();
+account.start();
 render();
