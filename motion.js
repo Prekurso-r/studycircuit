@@ -46,18 +46,20 @@ function clearFlips() {
 
 // No View Transitions: the new page fades in (and slides in from the side it was reached from).
 function fallbackEnter(kind, dir) {
-  const main = document.querySelector('#main');
-  if (!main || !pageVisible()) return;
-  const slide = kind === 'route' && !reduced() ? (dir === 'back' ? -18 : 18) : 0;
-  main.animate(
-    [{ opacity: kind === 'route' ? 0 : 0.4, transform: `translateX(${slide}px)` }, { opacity: 1, transform: 'translateX(0)' }],
-    { duration: kind === 'route' ? 380 : 220, easing: EASE_OUT },
+  // Between the greeting's steps only the question slides; the map stays put.
+  const target = kind === 'flow' ? document.querySelector('#main .next-copy') : document.querySelector('#main');
+  if (!target || !pageVisible()) return;
+  const travels = kind === 'route' || kind === 'flow';
+  const slide = travels && !reduced() ? (dir === 'back' ? -18 : 18) : 0;
+  target.animate(
+    [{ opacity: travels ? 0 : 0.4, transform: `translateX(${slide}px)` }, { opacity: 1, transform: 'translateX(0)' }],
+    { duration: travels ? 380 : 220, easing: EASE_OUT },
   );
 }
 
 // Runs a DOM update inside a transition. Returns a promise that resolves once the update has been applied
 // (which, with View Transitions, is a frame later: the browser first photographs the old page).
-// kind: 'route' (page to page) | 'step' (next question) | 'check' (answer checked) | 'update' (anything else)
+// kind: 'route' (page to page) | 'flow' (between the greeting's steps) | 'step' (next question) | 'check' (answer checked) | 'update' (anything else)
 export function run(update, { kind = 'update', dir = 'forward' } = {}) {
   if (!hasTransitions() || !pageVisible()) {
     update();
@@ -120,8 +122,9 @@ export function themeSwap(apply, origin) {
 // Marks the page with what kind of change it was, and numbers the things that arrive one after another.
 export function settle(main, kind) {
   main.dataset.motion = kind;
-  if (kind !== 'route') return;
+  if (kind !== 'route' && kind !== 'flow') return;
   stagger(main);
+  if (kind === 'flow') return;
   drawNetwork(main);
   lightStrips(main);
   numberStops(main);
@@ -134,11 +137,14 @@ function stagger(main) {
   main.querySelectorAll('.next-copy > *').forEach((element, index) => element.style.setProperty('--i', Math.min(index, 6)));
   const rows = main.querySelectorAll('.lines-list > li, .station-row, .syllabus-topic, .activity-list > li, .saved-row, .review-item');
   rows.forEach((element, index) => element.style.setProperty('--r', Math.min(index, 10)));
+  // The greeting's choices arrive one after another.
+  main.querySelectorAll('.chooser-lines > .line-toggle, .heard-options > .heard-option').forEach((element, index) => element.style.setProperty('--r', Math.min(index, 10)));
 }
 
 // The network draws line by line out from the hub; each line's stations light as the line passes them.
+// (The greeting's map is not drawn here: it lights a line when its subject is chosen.)
 function drawNetwork(main) {
-  for (const svg of main.querySelectorAll('.network')) {
+  for (const svg of main.querySelectorAll('.network:not(.greeting-map)')) {
     const rank = new Map();
     const placed = new Map();
     const lineOf = element => {

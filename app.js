@@ -1,6 +1,7 @@
 import { originalRoundNames, questions, subjects, topics } from './questions.js';
 import { richText } from './format.js';
 import { createAccount } from './account.js';
+import { createWelcome, heardIds, skippedAnswer } from './welcome.js';
 import * as motion from './motion.js';
 
 const icons = {
@@ -66,14 +67,20 @@ const account = createAccount({
   showStorage: () => showStorageStatus(),
 });
 
+const welcome = createWelcome({
+  main, state, subjects, paperNumbers, icon, lineChooser, networkMap, persist, navigate,
+  announce: text => { announcement.textContent = text; },
+});
+
 function icon(name) {
   return `<svg class="icon icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
 }
 
 // lines: null until the student chooses (or skips) the subjects and Maths papers they take.
+// heard: null until the student answers (or skips) "How did you hear about us?"; kept here so a second device does not ask again.
 // updatedAt: when the student last changed anything here, so two devices can tell which copy is newer.
 function blankState() {
-  return { version: 1, level: 'simple', attempts: {}, saved: [], drafts: {}, active: null, history: [], lines: null, updatedAt: 0 };
+  return { version: 1, level: 'simple', attempts: {}, saved: [], drafts: {}, active: null, history: [], lines: null, heard: null, updatedAt: 0 };
 }
 
 function cleanAttempts(value) {
@@ -101,6 +108,7 @@ function cleanState(savedState) {
   }
   if (typeof saved.active === 'string') progress.active = saved.active;
   progress.lines = cleanLines(saved.lines);
+  progress.heard = heardIds.has(saved.heard) || saved.heard === skippedAnswer ? saved.heard : null;
   progress.attempts = cleanAttempts(saved.attempts);
   progress.updatedAt = Number.isFinite(saved.updatedAt) ? saved.updatedAt : 0;
   expandPhysicsDrafts(progress.drafts, progress.attempts);
@@ -298,35 +306,43 @@ function stationsAlong(route, topicList, offset) {
 
 const routePath = route => route.map(([x, y], index) => `${index ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 
-function networkMap(nextTopicId) {
+// preview: the greeting's map. Every subject and all six Maths papers are drawn, each waiting as a dotted track, and the
+// greeting lights the ones the student picks. Its elements carry the paper they belong to, and nothing in it is a link.
+function networkMap(nextTopicId, { list = mySubjects(), papers = takenPapers(), preview = false } = {}) {
   const parts = [];
   const stations = [];
   const labels = [];
-  for (const subject of mySubjects()) {
+  const track = (id, route, paper) => {
+    const attributes = paper ? ` data-paper="${paper}"` : '';
+    if (preview) parts.push(`<path class="net-ghost ${id}" d="${routePath(route)}"/>`);
+    parts.push(`<path class="net-line ${id}"${attributes} d="${routePath(route)}"/>`);
+  };
+  const named = (id, text) => preview ? text : `<a href="#/subjects/${id}" tabindex="-1">${text}</a>`;
+  for (const subject of list) {
     const sections = subject.syllabus.sections;
     if (subject.id === 'mathematics') {
-      parts.push(`<path class="net-line ${subject.id}" d="${routePath(mathsTrunk)}"/>`);
+      track(subject.id, mathsTrunk);
       sections.forEach((section, index) => {
-        if (!takenPapers().includes(String(index + 1))) return;
+        if (!papers.includes(String(index + 1))) return;
         const y = mathsJunction[1] + index * 30;
         const branch = index ? [mathsJunction, [mathsJunction[0] - index * 30, y], [96, y]] : [mathsJunction, [96, y]];
-        parts.push(`<path class="net-line ${subject.id}" d="${routePath(branch)}"/>`);
+        track(subject.id, branch, index + 1);
         const topicList = section.groups.flatMap(group => group.topics);
-        stations.push(...stationsAlong(branch, topicList, index ? 34 : 26).map(item => ({ ...item, subject })));
-        labels.push(`<text class="net-branch ${subject.id}" x="86" y="${y + 5}" text-anchor="end">P${index + 1}</text>`);
+        stations.push(...stationsAlong(branch, topicList, index ? 34 : 26).map(item => ({ ...item, subject, paper: index + 1 })));
+        labels.push(`<text class="net-branch ${subject.id}"${preview ? ` data-paper="${index + 1}"` : ''} x="86" y="${y + 5}" text-anchor="end">P${index + 1}</text>`);
       });
-      const lastBranch = Math.max(...takenPapers().map(Number)) - 1;
-      labels.push(`<a href="#/subjects/${subject.id}" tabindex="-1"><text class="net-label ${subject.id}" x="62" y="${mathsJunction[1] + (lastBranch + 1) * 30 + 18}">${subject.name} ${subject.code}</text></a>`);
+      const lastBranch = Math.max(...papers.map(Number)) - 1;
+      labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="62" y="${mathsJunction[1] + (lastBranch + 1) * 30 + 18}">${subject.name} ${subject.code}</text>`));
       continue;
     }
     const route = lineRoutes[subject.id];
-    parts.push(`<path class="net-line ${subject.id}" d="${routePath(route)}"/>`);
+    track(subject.id, route);
     const topicList = subject.syllabus.topics;
     const placed = stationsAlong(route, topicList, 40);
     stations.push(...placed.map(item => ({ ...item, subject })));
     // AS / A Level fare-zone boundary, drawn across the line between the two zones.
     const asCount = sections[0].groups.flatMap(group => group.topics).length;
-    if (sections.length > 1 && placed[asCount]) {
+    if (!preview && sections.length > 1 && placed[asCount]) {
       const [ax, ay] = placed[asCount - 1].point;
       const [bx, by, dx, dy] = placed[asCount].point;
       const mx = (ax + bx) / 2;
@@ -337,11 +353,11 @@ function networkMap(nextTopicId) {
     const anchor = subject.id === 'physics' ? 'start' : 'end';
     const lx = subject.id === 'chemistry' ? ex - 16 : ex;
     const ly = subject.id === 'biology' ? ey + 30 : subject.id === 'chemistry' ? ey + 6 : ey - 18;
-    labels.push(`<a href="#/subjects/${subject.id}" tabindex="-1"><text class="net-label ${subject.id}" x="${lx}" y="${ly}" text-anchor="${anchor}">${subject.name} ${subject.code}</text></a>`);
+    labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="${lx}" y="${ly}" text-anchor="${anchor}">${subject.name} ${subject.code}</text>`));
   }
   // Unvisited stations are small ticks on the line; visited ones are lit rings; the next stop is named.
   let next = '';
-  for (const { topic, point: [x, y], subject } of stations) {
+  for (const { topic, point: [x, y], subject, paper } of stations) {
     const visited = summary(topic.questionIds).unique > 0;
     const cx = x.toFixed(1);
     const cy = y.toFixed(1);
@@ -354,11 +370,12 @@ function networkMap(nextTopicId) {
         <text class="net-next-label" x="${(x + dx).toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}">${escapeText(topicLabel(topic))}</text></g>`;
       continue;
     }
+    const tag = preview && paper ? ` data-paper="${paper}"` : '';
     parts.push(visited
-      ? `<circle class="net-station is-visited ${subject.id}" cx="${cx}" cy="${cy}" r="6"/>`
-      : `<circle class="net-tick ${subject.id}" cx="${cx}" cy="${cy}" r="2.6"/>`);
+      ? `<circle class="net-station is-visited ${subject.id}"${tag} cx="${cx}" cy="${cy}" r="6"/>`
+      : `<circle class="net-tick ${subject.id}"${tag} cx="${cx}" cy="${cy}" r="2.6"/>`);
   }
-  return `<svg class="network" viewBox="0 0 960 580" aria-hidden="true" focusable="false">
+  return `<svg class="network${preview ? ' greeting-map' : ''}" viewBox="0 0 960 580" aria-hidden="true" focusable="false">
     ${parts.join('')}
     <circle class="net-hub" cx="${hub[0]}" cy="${hub[1]}" r="13"/>
     ${next}${labels.join('')}
@@ -592,22 +609,24 @@ function linesSummary() {
 }
 
 // The chooser: subject line chips as toggles; Maths opens its six papers.
-function lineChooser(editing) {
+// mode 'welcome' is the greeting's question (with a way on and a way to skip); 'edit' is the Subjects page's.
+function lineChooser(mode) {
+  const greeting = mode === 'welcome';
   const chosen = state.lines && !state.lines.skipped ? state.lines.subjects : [];
   const papers = state.lines?.papers ?? [];
   const maths = subjectById.mathematics;
-  return `<form class="line-chooser" data-line-chooser novalidate>
-    <fieldset><legend>Subjects you take</legend>
+  return `<form class="line-chooser${greeting ? ' welcome-chooser' : ''}" data-line-chooser="${mode}" novalidate>
+    <fieldset><legend>${greeting ? 'Which subjects do you take?' : 'Subjects you take'}</legend>
       <div class="chooser-lines">${subjects.map(subject => `<label class="line-toggle ${subject.id}"><input type="checkbox" name="line" value="${subject.id}"${chosen.includes(subject.id) ? ' checked' : ''}><span class="line-toggle-name">${subject.name}</span><span class="line-toggle-code">${subject.code}</span></label>`).join('')}</div>
     </fieldset>
     <fieldset class="paper-picker mathematics"${chosen.includes('mathematics') ? '' : ' hidden'}><legend>Maths papers you take</legend>
       <div class="chooser-papers">${maths.syllabus.sections.map((section, index) => `<label class="paper-toggle"><input type="checkbox" name="paper" value="${index + 1}"${papers.includes(String(index + 1)) ? ' checked' : ''}><span><b>P${index + 1}</b> ${escapeText(section.name.split(' · ')[1] ?? section.name)}</span></label>`).join('')}</div>
       <p class="chooser-hint">Pick none and all six papers count.</p>
     </fieldset>
-    <p class="selection-error" id="lines-error" hidden role="alert">Choose at least one subject${editing ? '' : ', or skip for now'}.</p>
+    <p class="selection-error" id="lines-error" hidden role="alert">Choose at least one subject${greeting ? ', or skip for now' : ''}.</p>
     <div class="chooser-actions">
-      <button type="submit" class="button primary">Save my lines${icon('arrow')}</button>
-      ${editing ? '' : '<button type="button" class="button secondary" data-action="skip-lines">Skip for now</button>'}
+      <button type="submit" class="button primary">${greeting ? 'Continue' : 'Save my lines'}${icon('arrow')}</button>
+      ${greeting ? '<button type="button" class="button secondary" data-action="skip-lines">Skip for now</button>' : ''}
     </div>
   </form>`;
 }
@@ -686,31 +705,21 @@ function overview() {
     const action = state.drafts[draftKey(topic.id)] ? 'Resume' : 'Practise';
     actions = `<button class="button primary" type="button" data-action="start" data-kind="${topic.id}">${action} this topic${icon('arrow')}</button>${next.kind === 'weak' ? weakestButton('secondary') : ''}${mixedButton()}`;
   } else {
+    // The greeting has already asked which subjects the student takes, so a first visit goes straight to practice.
     lead = 'First stop';
-    if (!state.lines) {
-      name = 'Pick your lines';
-      meta = `<strong class="next-tag">${lead}</strong> ·&nbsp;Which subjects do you take? Your home, mixed practice and next stop will follow your answer.`;
-      actions = lineChooser(false);
-    } else {
-      name = 'Pick a line';
-      meta = `<strong class="next-tag">${lead}</strong> ·&nbsp;Choose a topic below, or sample your lines with a mixed round of 10 questions.`;
-      actions = `${mixedButton(true)}<a class="button secondary" href="#/subjects">Choose a subject${icon('arrow')}</a>`;
-    }
+    name = 'Pick a line';
+    meta = `<strong class="next-tag">${lead}</strong> ·&nbsp;Choose a topic below, or sample your lines with a mixed round of 10 questions.`;
+    actions = `${mixedButton(true)}<a class="button secondary" href="#/subjects">Choose a subject${icon('arrow')}</a>`;
   }
   return `<section class="next-stop ${line}" aria-labelledby="next-heading">
       <div class="next-copy">
         <h1 class="next-heading" id="next-heading" data-page-title tabindex="-1"><span class="sr-only">${lead}: </span><span class="next-name">${name}</span></h1>
         <p class="next-meta">${meta.includes('station-badge') ? meta : `<span class="next-meta-text">${meta}</span>`}</p>
-        <div class="next-actions${next.kind === 'start' && !state.lines ? ' has-chooser' : ''}">${actions}</div>
+        <div class="next-actions">${actions}</div>
         ${levelControl()}
       </div>
       <div class="next-map">${networkMap(nextTopicId)}${mapLegend}</div>
     </section>
-    ${!state.lines && next.kind !== 'start' ? `<section class="content-section lines-ask" aria-labelledby="lines-ask-heading">
-      <div class="section-heading"><h2 id="lines-ask-heading">Which subjects do you take?</h2></div>
-      <p class="section-note">Your home, mixed practice and next stop will follow your answer. You can change it any time on the Subjects page.</p>
-      ${lineChooser(false)}
-    </section>` : ''}
     <section class="content-section" aria-labelledby="lines-heading">
       <div class="section-heading"><h2 id="lines-heading">Your lines</h2>${isNewcomer() ? '' : `<p class="section-meta">${totalsLine()}</p>`}</div>
       ${linesList(nextTopicId)}
@@ -728,9 +737,9 @@ function firstSteps() {
   return `<section class="first-steps" aria-labelledby="first-steps-heading">
     <h2 id="first-steps-heading">How Study Circuit works</h2>
     <ol>
-      <li><span class="step-number" aria-hidden="true">1</span><p><strong>Pick a topic</strong> from a line above, or start mixed practice.</p></li>
-      <li><span class="step-number" aria-hidden="true">2</span><p><strong>Answer, then read the explanation</strong> that follows every question.</p></li>
-      <li><span class="step-number" aria-hidden="true">3</span><p><strong>Watch your stations light up.</strong> After ${statusMinimum} answers a topic shows Needs work, Getting there or Secure, and your weakest become your next stop.</p></li>
+      <li><span class="step-number" aria-hidden="true">1</span><p><strong>Answer, then read the explanation</strong> that follows every question.</p></li>
+      <li><span class="step-number" aria-hidden="true">2</span><p><strong>Watch your stations light up</strong> on the map as you practise each topic.</p></li>
+      <li><span class="step-number" aria-hidden="true">3</span><p><strong>Find your weak spots.</strong> After ${statusMinimum} answers a topic shows Needs work, Getting there or Secure, and your weakest become your next stop.</p></li>
     </ol>
     ${storageAvailable ? `<p class="first-steps-note">${account.hint()}</p>` : ''}
   </section>`;
@@ -743,7 +752,7 @@ function subjectIndex() {
     <section aria-labelledby="your-lines-heading">
       <div class="section-heading"><h2 id="your-lines-heading">Your lines</h2><p class="section-meta">${linesSummary()}</p></div>
       ${linesList(null, true)}
-      <details class="lines-edit"${state.lines ? '' : ' open'}><summary>${state.lines ? 'Change your lines' : 'Choose your lines'}${icon('chevron')}</summary>${lineChooser(true)}</details>
+      <details class="lines-edit"${state.lines ? '' : ' open'}><summary>${state.lines ? 'Change your lines' : 'Choose your lines'}${icon('chevron')}</summary>${lineChooser('edit')}</details>
     </section>
     ${others.length ? `<section class="content-section" aria-labelledby="other-lines-heading">
       <div class="section-heading"><h2 id="other-lines-heading">Other subjects</h2></div>
@@ -1081,7 +1090,8 @@ function resultsPage() {
 
 // Where a page sits along the journey, so the new page can arrive from the direction of travel:
 // tabs run in navigation order, a subject sits just past Subjects, and a round sits past them all.
-const routeOrder = { '': 0, subjects: 1, progress: 2, saved: 3, account: 4, practice: 5, results: 6 };
+// The greeting sits before everything: its two steps (subjects, then how they heard) run forward into the overview.
+const routeOrder = { welcome: -2, '': 0, subjects: 1, progress: 2, saved: 3, account: 4, practice: 5, results: 6 };
 let lastRoute = null;
 
 function routeRank(hash) {
@@ -1090,17 +1100,19 @@ function routeRank(hash) {
 }
 
 // kind: 'check' (an answer was checked), 'step' (on to the next question); otherwise it is worked out here:
-// a different page is a 'route', anything else on the same page is a quiet 'update'.
+// a different page is a 'route', a move between the greeting's own steps is a 'flow', anything else on the same page is a quiet 'update'.
 // Returns a promise that resolves once the page has been redrawn (View Transitions draw it a frame later).
 function render(focus = false, kind) {
+  welcome.gate();
   const hash = location.hash;
   const [, section = '', sub = ''] = hash.slice(1).split('/');
   const key = `${section}/${sub}`;
   const first = lastRoute === null;
   const moved = !first && key !== lastRoute.key;
+  const inFlow = moved && section === 'welcome' && lastRoute.key.startsWith('welcome/');
   const dir = moved && routeRank(hash) < lastRoute.rank ? 'back' : 'forward';
   lastRoute = { key, rank: routeRank(hash) };
-  const motionKind = kind ?? (first || moved ? 'route' : 'update');
+  const motionKind = kind ?? (inFlow ? 'flow' : first || moved ? 'route' : 'update');
   const apply = () => paint(focus, motionKind);
   if (first) {
     apply();
@@ -1132,6 +1144,10 @@ function paint(focus, motionKind) {
       content = account.page();
       title = 'Account';
       break;
+    case 'welcome':
+      content = welcome.page(subjectId);
+      title = 'Welcome';
+      break;
     case 'practice':
       content = quizPage();
       title = 'Practice';
@@ -1158,11 +1174,12 @@ function paint(focus, motionKind) {
     previousProgress.value = nextValue;
   }
   document.title = `Study Circuit · ${title}`;
-  document.body.dataset.route = ['subjects', 'progress', 'saved', 'practice', 'results', 'account'].includes(section) ? section : 'overview';
+  document.body.dataset.route = ['subjects', 'progress', 'saved', 'practice', 'results', 'account', 'welcome'].includes(section) ? section : 'overview';
   for (const link of navLinks) {
     if (link.dataset.nav === active) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
+  if (section === 'welcome') welcome.afterPaint();
   if (focus) {
     window.scrollTo(0, 0);
     main.querySelector('[data-page-title]')?.focus({ preventScroll: true });
@@ -1396,9 +1413,10 @@ document.addEventListener('click', event => {
   if (button.dataset.action === 'skip-lines') {
     state.lines = { subjects: subjects.map(subject => subject.id), papers: [], skipped: true };
     persist();
-    render(true);
     announcement.textContent = 'All four subjects kept. You can choose your lines any time on the Subjects page.';
+    welcome.subjectsDone();
   }
+  if (button.dataset.action === 'skip-heard') welcome.skipHeard();
   if (button.dataset.action === 'next') advance();
   if (button.dataset.action === 'bookmark') toggleSaved(button);
 });
@@ -1418,6 +1436,11 @@ main.addEventListener('change', event => {
     const form = event.target.form;
     motion.setHidden(form.querySelector('#lines-error'), true);
     if (event.target.value === 'mathematics') motion.setHidden(form.querySelector('.paper-picker'), !event.target.checked);
+    welcome.sync(form);
+    return;
+  }
+  if (event.target.matches('input[name="paper"]')) {
+    welcome.sync(event.target.form);
     return;
   }
   if (event.target.matches('input[name="practice-level"]')) {
@@ -1445,14 +1468,20 @@ function saveLines(form) {
   const papers = chosen.includes('mathematics') ? [...form.querySelectorAll('input[name="paper"]:checked')].map(input => input.value) : [];
   state.lines = { subjects: chosen, papers, skipped: false };
   persist();
-  render(true);
   announcement.textContent = `Your lines are saved: ${linesSummary()}.`;
+  if (form.dataset.lineChooser === 'welcome') welcome.subjectsDone();
+  else render(true);
 }
 
 main.addEventListener('submit', event => {
   if (event.target.matches('[data-line-chooser]')) {
     event.preventDefault();
     saveLines(event.target);
+    return;
+  }
+  if (event.target.matches('[data-heard-form]')) {
+    event.preventDefault();
+    welcome.submitHeard(event.target);
     return;
   }
   if (event.target.id === 'quiz-form') {
@@ -1466,4 +1495,5 @@ motion.init();
 syncRail();
 showStorageStatus();
 account.start();
+welcome.start();
 render();

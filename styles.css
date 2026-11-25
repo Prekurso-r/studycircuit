@@ -946,14 +946,15 @@ sub { top: .24em; }
 .line-toggle { display: inline-flex; align-items: center; gap: .45rem; }
 .line-toggle-code { color: var(--muted); font: 600 .875rem/1 var(--display); letter-spacing: .06em; }
 .line-toggle input:checked + span { background: var(--line); color: var(--chip-ink); }
-.line-toggle input:checked + span::before {
+.line-toggle > span:first-of-type::before {
   content: "";
-  width: .5rem;
+  width: 0;
   height: .5rem;
-  margin-right: .5rem;
+  margin-right: 0;
   border-radius: 50%;
   background: var(--chip-ink);
 }
+.line-toggle input:checked + span::before { width: .5rem; margin-right: .5rem; }
 .line-toggle:hover input:not(:checked) + span { background: var(--surface-2); }
 .line-toggle input:focus-visible + span, .paper-toggle input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
 
@@ -972,22 +973,79 @@ sub { top: .24em; }
 }
 .paper-toggle b { color: var(--line-text); font: 700 1rem/1 var(--display); letter-spacing: .04em; }
 .paper-toggle input:checked + span { border: 2px solid var(--line); background: var(--surface-2); font-weight: 600; }
-.paper-toggle input:checked + span::after {
+.paper-toggle span::after {
   content: "";
+  flex: none;
   width: .55rem;
   height: .55rem;
   margin-left: auto;
   border-radius: 50%;
   background: var(--line);
   box-shadow: 0 0 0 2px var(--ground), 0 0 0 3.5px var(--line);
+  scale: 0;
 }
+.paper-toggle input:checked + span::after { scale: 1; }
 .paper-toggle:hover input:not(:checked) + span { border-color: var(--line); }
 .chooser-hint { margin-top: .5rem; color: var(--muted); font-size: .875rem; }
 .chooser-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
 .line-chooser .selection-error { margin-top: -.4rem; }
 
-.next-actions.has-chooser { display: block; }
-.lines-ask .line-chooser { margin-top: .25rem; }
+
+/* ---------- The greeting: subjects, then how the student heard ---------- */
+.welcome-stop { padding-bottom: 0; border-bottom: 0; }
+.welcome-chooser { gap: 1.25rem; margin-top: 1.75rem; }
+.welcome-chooser legend { margin-bottom: .8rem; color: var(--ink); font: 700 1.6rem/1.1 var(--display); letter-spacing: .03em; }
+.welcome-chooser .paper-picker legend { margin-bottom: .55rem; color: var(--muted); font: 600 .875rem/1 var(--display); letter-spacing: .08em; }
+
+.heard-form { display: grid; gap: 1.5rem; max-width: 40rem; margin-top: 1.75rem; }
+.heard-form fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.heard-form .chooser-actions { align-items: center; }
+.heard-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+.heard-option { position: relative; cursor: pointer; }
+.heard-option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.heard-option span {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: .55rem .85rem .55rem 2.75rem;
+  border: 2px solid var(--hair-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  line-height: 1.25;
+}
+/* A station ring: empty until chosen, then filled. */
+.heard-option span::before, .heard-option span::after { content: ""; position: absolute; border-radius: 50%; }
+.heard-option span::before { left: .85rem; top: 50%; width: 1.1rem; height: 1.1rem; margin-top: -.55rem; border: 2px solid var(--hair-strong); background: var(--ground); }
+.heard-option span::after { left: 1.15rem; top: 50%; width: .5rem; height: .5rem; margin-top: -.25rem; background: var(--ink); scale: 0; }
+.heard-option:hover input:not(:checked) + span { border-color: var(--ink); background: var(--surface-2); }
+.heard-option input:checked + span { border-color: var(--ink); background: var(--surface-2); }
+.heard-option input:checked + span::before { border-color: var(--ink); }
+.heard-option input:checked + span::after { scale: 1; }
+.heard-option input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* The greeting's map: each line waits as a dotted track and is drawn when its subject is chosen. */
+.greeting-map .net-ghost { fill: none; stroke: var(--hair-strong); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: .1 12; }
+.greeting-map .net-line { stroke-dasharray: var(--len, 2000); stroke-dashoffset: var(--len, 2000); opacity: 0; }
+.greeting-map .net-line.is-on { stroke-dashoffset: 0; opacity: 1; }
+.greeting-map :is(.net-tick, .net-station) { transform-box: fill-box; transform-origin: center; scale: 0; opacity: 0; }
+.greeting-map :is(.net-tick, .net-station).is-on { scale: 1; opacity: 1; }
+.greeting-map :is(.net-label, .net-branch) { opacity: 0; }
+.greeting-map :is(.net-label, .net-branch).is-on { opacity: 1; }
+.greeting-map.is-setting, .greeting-map.is-setting * { transition: none !important; }
+@media (min-width: 1100px) {
+  /* The map stays put while the question beside it grows (the Maths papers unfold). */
+  .next-stop.welcome-stop { align-items: start; }
+  .welcome-stop .next-map { position: sticky; top: 1.5rem; }
+}
+@media (max-width: 1099px) {
+  .welcome-stop .next-map { max-width: 34rem; }
+}
+@media (max-width: 640px) {
+  /* The greeting keeps its map on a phone: it is the picture of the choice, not data to read, so the names stay off it. */
+  .welcome-stop .next-map { display: block; margin-top: 1.5rem; }
+  .greeting-map :is(.net-label, .net-branch) { display: none; }
+}
 
 /* Subjects page: change your lines; Maths page: papers you don't take */
 .lines-edit { margin-top: 1rem; }
@@ -1031,6 +1089,13 @@ sub { top: .24em; }
   .rail-brand { display: flex; padding: 0 .4rem; }
   .navigation-dock { display: none; }
   .next-stop { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: 3rem; }
+}
+
+/* The greeting is a full screen of its own: no rail, no menu button, no tab bar. The header stays, so a returning student can sign in. */
+[data-route="welcome"] .desktop-sidebar, [data-route="welcome"] .sidebar-toggle, [data-route="welcome"] .navigation-dock { display: none; }
+@media (min-width: 1100px) {
+  [data-route="welcome"] .app-shell { padding-left: 0; }
+  [data-route="welcome"] .app-header { display: flex; }
 }
 
 /* Tablets: header with a menu button and an off-canvas sidebar */
@@ -1353,6 +1418,8 @@ sub { top: .24em; }
 @keyframes page-in-back { from { opacity: 0; translate: -28px 0; } }
 @keyframes card-out { to { opacity: 0; translate: -26px 0; } }
 @keyframes card-in { from { opacity: 0; translate: 38px 0; } }
+@keyframes card-out-back { to { opacity: 0; translate: 26px 0; } }
+@keyframes card-in-back { from { opacity: 0; translate: -38px 0; } }
 @keyframes dock-out { to { translate: 0 100%; } }
 @keyframes dock-in { from { translate: 0 100%; } }
 
@@ -1411,6 +1478,17 @@ sub { top: .24em; }
   html[data-vt="step"]::view-transition-old(card) { animation: card-out .13s cubic-bezier(.3, 0, .6, 1) both; }
   html[data-vt="step"]::view-transition-new(card) { animation: card-in .42s var(--ease-out) .09s both; }
 
+  /* Between the greeting's steps the question rides out and the next rides in; the map stays where it is. */
+  html[data-vt="flow"] .welcome-stop .next-copy { view-transition-name: flow-copy; }
+  html[data-vt="flow"] .welcome-stop .next-map { view-transition-name: flow-map; }
+  html[data-vt="flow"]::view-transition-group(flow-copy), html[data-vt="flow"]::view-transition-group(flow-map) { animation-duration: .4s; animation-timing-function: var(--ease-out); }
+  html[data-vt="flow"]::view-transition-old(flow-copy), html[data-vt="flow"]::view-transition-new(flow-copy),
+  html[data-vt="flow"]::view-transition-old(flow-map), html[data-vt="flow"]::view-transition-new(flow-map) { mix-blend-mode: normal; }
+  html[data-vt="flow"]::view-transition-old(flow-copy) { animation: card-out .13s cubic-bezier(.3, 0, .6, 1) both; }
+  html[data-vt="flow"]::view-transition-new(flow-copy) { animation: card-in .42s var(--ease-out) .09s both; }
+  html[data-vt="flow"][data-dir="back"]::view-transition-old(flow-copy) { animation-name: card-out-back; }
+  html[data-vt="flow"][data-dir="back"]::view-transition-new(flow-copy) { animation-name: card-in-back; }
+
   /* The theme change is a circle growing from the button (the clip-path is animated by motion.js). */
   html[data-vt="theme"]::view-transition-old(root), html[data-vt="theme"]::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
   html[data-vt="theme"]::view-transition-old(root) { z-index: 1; }
@@ -1449,6 +1527,28 @@ sub { top: .24em; }
   #main[data-motion="route"] .net-next-ring { animation: pop-in .6s var(--ease-out) 1.15s both; }
   #main[data-motion="route"] .net-next-label { animation: fade-in .5s ease 1.3s both; }
   #main[data-motion="route"] .net-halo { animation: halo-in .7s var(--ease-out) 1.3s both, station-breathe 3.2s ease-in-out 2s infinite; }
+
+  /* The greeting: its choices arrive one after another, and the map's dotted tracks fade in under the hub. */
+  #main:is([data-motion="route"], [data-motion="flow"]) :is(.chooser-lines > .line-toggle, .heard-options > .heard-option) {
+    animation: rise-sm .5s var(--ease-out) both;
+    animation-delay: calc(240ms + var(--r, 0) * 45ms);
+  }
+  #main[data-motion="route"] .greeting-map :is(.net-line, .net-tick, .net-station, .net-label, .net-branch) { animation: none; }
+  #main[data-motion="route"] .net-ghost { animation: fade-in .9s ease .15s both; }
+
+  /* Choosing: the chip's dot grows in, a paper's tick pops, and the matching line is drawn (or taken back). */
+  .line-toggle > span:first-of-type::before { transition: width .25s var(--ease-out), margin-right .25s var(--ease-out); }
+  .paper-toggle span { transition: background .15s ease, border-width .15s ease, border-color .15s ease; }
+  .paper-toggle span::after { transition: scale .3s var(--ease-out); }
+  .heard-option span { transition: background .15s ease, border-color .15s ease; }
+  .heard-option span::before { transition: border-color .15s ease; }
+  .heard-option span::after { transition: scale .3s var(--ease-out); }
+  .greeting-map .net-line { transition: stroke-dashoffset .8s var(--ease-io) var(--d, 0ms), opacity .15s linear var(--d, 0ms); }
+  .greeting-map .net-line:not(.is-on) { transition: stroke-dashoffset .45s var(--ease-in), opacity .3s ease .1s; }
+  .greeting-map :is(.net-tick, .net-station) { transition: scale .5s var(--ease-out) var(--d, 0ms), opacity .2s ease var(--d, 0ms); }
+  .greeting-map :is(.net-tick, .net-station):not(.is-on) { transition: scale .25s var(--ease-in), opacity .2s ease; }
+  .greeting-map :is(.net-label, .net-branch) { transition: opacity .4s ease .6s; }
+  .greeting-map :is(.net-label, .net-branch):not(.is-on) { transition: opacity .2s ease; }
 
   /* Station strips fill left to right, row after row. */
   #main[data-motion="route"] .strip i { animation: pop-in .45s var(--ease-out) both; animation-delay: var(--d, 0ms); }
@@ -1503,4 +1603,9 @@ sub { top: .24em; }
   html[data-vt]::view-transition-old(page), html[data-vt]::view-transition-new(page) { animation-duration: .18s; }
   html[data-vt]::view-transition-group(root) { animation: none; }
   .nav-bar { transition: opacity .2s ease; }
+  .greeting-map .net-line { stroke-dashoffset: 0; transition: opacity .25s ease; }
+  .greeting-map :is(.net-tick, .net-station) { scale: 1; transition: opacity .25s ease; }
+  .greeting-map :is(.net-label, .net-branch) { transition: opacity .25s ease; }
+  #main:is([data-motion="route"], [data-motion="flow"]) :is(.chooser-lines > .line-toggle, .heard-options > .heard-option) { animation: fade-in .25s ease both; }
+  #main[data-motion="route"] .net-ghost { animation: fade-in .25s ease both; }
 }
