@@ -266,7 +266,8 @@ export function createAccount(ctx) {
 
   const privacy = `<details class="account-details">
     <summary>What we keep${ctx.icon('chevron')}</summary>
-    <p>Your email address, your password (stored scrambled, so nobody can read it) and your progress: answers, saved questions and finished rounds. We use them to sign you in and keep your devices in step, and for nothing else. You can delete all of it at any time from this page.</p>
+    <p>Your email address, your password (stored scrambled, so nobody can read it) and your progress: answers, saved questions, your subjects and finished rounds. We use them to sign you in and keep your devices in step, and for nothing else. You can delete all of it at any time from this page.</p>
+    <p>When you say how you heard about Study Circuit, that one choice is sent on its own, with no name, email or account attached, so we can see where students find the site. It stays after an account is deleted, because nothing in it says whose it was.</p>
     <p>The site also counts visits with Cloudflare Web Analytics, which does not use cookies and does not follow people from site to site.</p>
   </details>`;
 

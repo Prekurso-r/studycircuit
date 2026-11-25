@@ -3,6 +3,7 @@
 // What only ever grows (answers given, finished rounds) is combined, so nothing earned on one device is lost.
 // What a student can undo (saved questions, the round in progress, their lines, the level) follows
 // whichever copy was changed last, so un-saving a question on one device sticks on the other.
+// An answered question ("how did you hear about us?") is never undone: once either copy has an answer, it is kept.
 
 const roundKey = round => `${round?.kind}|${round?.finishedAt}`;
 
@@ -38,6 +39,7 @@ export function mergeProgress(local, remote) {
   merged.attempts = attempts;
   merged.history = history;
   merged.lines = structuredClone(newer.lines ?? older.lines ?? null);
+  merged.heard = newer.heard ?? older.heard ?? null;
   merged.updatedAt = Math.max(local.updatedAt ?? 0, remote.updatedAt ?? 0);
   return merged;
 }
