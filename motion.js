@@ -19,7 +19,7 @@ const EASE_IN = 'cubic-bezier(0.7, 0, 0.84, 0)';
 const EASE_IO = 'cubic-bezier(0.65, 0, 0.35, 1)';
 const root = document.documentElement;
 const reduceQuery = matchMedia('(prefers-reduced-motion: reduce)');
-const lineIds = ['physics', 'chemistry', 'biology', 'mathematics'];
+const lineIds = ['physics', 'chemistry', 'biology', 'mathematics', 'economics', 'business'];
 
 export const reduced = () => reduceQuery.matches;
 const hasTransitions = () => typeof document.startViewTransition === 'function';

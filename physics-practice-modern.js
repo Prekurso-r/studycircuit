@@ -1,5 +1,7 @@
 import { calc, drill, exact, plotFigure, practice, scenario } from './physics-practice-tools.js';
 
+const article = word => (/^[aeiou]/i.test(word) ? 'an' : 'a');
+
 const particles = practice('11', [
   ['hadron-family', 'Which group contains particles each built from a quark and an antiquark?', ['Mesons', 'Baryons', 'Leptons', 'Photons'], 0, 'A meson is a hadron with a valence quark and antiquark. A baryon has three valence quarks.'],
   ['charged-lepton', 'Which particle is a lepton?', ['Neutron', 'Pion', 'Electron', 'Proton'], 2, 'The electron is an elementary lepton. The neutron, pion and proton are hadrons made from quarks.'],
@@ -8,7 +10,7 @@ const particles = practice('11', [
   drill('pair-threshold', [['electron', 'positron', 0.511, 2.8, 2.2], ['muon', 'antimuon', 105.7, 380, 320], ['electron', 'positron', 0.511, 3.2, 2.5], ['muon', 'antimuon', 105.7, 520, 460]], (particle, anti, rest, maximum, beam) => {
     const threshold = 2 * rest;
     return scenario(
-      `A photon near a heavy nucleus can produce a ${particle} and a ${anti}. Neglect nuclear recoil energy. The graph shows the total kinetic energy of the pair for photons above the threshold. Consider a photon of energy ${beam} MeV.`,
+      `A photon near a heavy nucleus can produce ${article(particle)} ${particle} and ${article(anti)} ${anti}. Neglect nuclear recoil energy. The graph shows the total kinetic energy of the pair for photons above the threshold. Consider a photon of energy ${beam} MeV.`,
       calc('Read the minimum photon energy for production of this pair.', 'MeV', threshold, 'Read the photon energy where the pair first has zero kinetic energy.'),
       calc(`Find the rest energy of one ${particle}.`, 'MeV', rest, 'At the threshold there is just enough energy to create two equal rest masses. Divide the threshold photon energy by two.'),
       calc('If the kinetic energy is shared equally, find the kinetic energy of each produced particle for the stated photon.', 'MeV', (beam - threshold) / 2, 'Subtract the combined rest energy from the photon energy and divide the remaining kinetic energy by two.'),
@@ -16,7 +18,7 @@ const particles = practice('11', [
     );
   }),
   drill('valence-particles', [[3, 2, 1], [5, 4, 2], [4, 6, 3], [6, 5, 2]], (protons, neutrons, antiprotons) => scenario(
-    `Consider ${protons} protons, ${neutrons} neutrons and ${antiprotons} antiprotons before any interactions. A proton’s valence content is uud, a neutron’s is udd, and an antiproton contains the antiparticles of a proton’s quarks.`,
+    `Consider ${protons} protons, ${neutrons} neutrons and ${antiprotons} ${antiprotons === 1 ? 'antiproton' : 'antiprotons'} before any interactions. A proton’s valence content is uud, a neutron’s is udd, and an antiproton contains the antiparticles of a proton’s quarks.`,
     exact('Find the net electric charge in units of the elementary charge.', 'e', protons - antiprotons, 'Each proton contributes +1, each neutron zero and each antiproton −1.'),
     exact('Find the total baryon number.', '', protons + neutrons - antiprotons, 'Protons and neutrons each have baryon number +1. An antiproton contributes −1.'),
     exact('Find the number of valence down quarks in the protons and neutrons combined. Do not count antiquarks.', 'quarks', protons + 2 * neutrons, 'Count one down quark in each proton and two in each neutron.'),
@@ -62,7 +64,7 @@ const quantum = practice('22', [
     const stopping = (maximum - threshold) * 1e14 * h / e;
     return scenario(
       `The graph shows stopping potential for photoelectrons emitted from a clean metal. Plot values of frequency are in units of 10¹⁴ Hz. The light frequency is then set to ${incident} × 10¹⁴ Hz. Use e = 1.60 × 10⁻¹⁹ C.`,
-      calc('Read the threshold frequency.', '10¹⁴ Hz', threshold, 'Photoelectrons have zero maximum kinetic energy at the frequency-axis intercept.'),
+      calc('Read the threshold frequency.', '× 10¹⁴ Hz', threshold, 'Photoelectrons have zero maximum kinetic energy at the frequency-axis intercept.'),
       calc('Calculate Planck’s constant from the gradient.', 'J s', h, 'From eVstop = hf − work function, the gradient on a hertz scale is h/e. Divide the plotted slope by 10¹⁴, then multiply by e.'),
       calc('Find the maximum photoelectron kinetic energy at the stated new frequency.', 'eV', (incident - threshold) * 1e14 * h / e, 'Read or interpolate the stopping voltage at the new frequency. The maximum kinetic energy in eV has the same numerical value as the stopping voltage in volts.'),
       plotFigure({ caption: 'Photoelectric stopping potential against light frequency', alt: `The line starts at zero volts for a frequency of ${threshold} × 10¹⁴ Hz and reaches ${stopping.toFixed(3)} volts at ${maximum} × 10¹⁴ Hz.`, xLabel: 'frequency / 10¹⁴ Hz', yLabel: 'stopping p.d. / V', xTicks: [0, threshold, incident, maximum], yTicks: [0, stopping / 2, stopping], traces: [{ points: [[threshold, 0], [maximum, stopping]] }] }),
