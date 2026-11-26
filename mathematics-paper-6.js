@@ -102,7 +102,7 @@ function normalLower(z) {
   simple('binomial-conditions', 'Which binomial distribution best meets the Cambridge conditions for a Poisson approximation?',
     ['Binomial with n = 220 and p = 0.015', 'Binomial with n = 25 and p = 0.15',
       'Binomial with n = 240 and p = 0.24', 'Binomial with n = 40 and p = 0.40'],
-    'Look for a large number of trials and rare successes, in practice n greater than 50 and np less than about 5. The first model has np = 3.3.');
+    'Look for a large number of trials and rare successes, in practice n greater than 50 and np less than about 5. With n = 220 and p = 0.015, np = 3.3.');
 
   simple('approximate-no-returns', 'There are 160 independent orders, each with probability 0.01875 of being returned. Use a Poisson approximation to find the probability that none is returned.',
     probabilities(poissonMass(3, 0), poissonMass(0.01875, 0), poissonMass(3, 1), 1 - poissonMass(3, 0)),
