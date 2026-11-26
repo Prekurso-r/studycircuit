@@ -152,6 +152,29 @@ const biologySections = [
   },
 ];
 
+// Each station contains a starter set rather than every syllabus subtopic.
+function courseSections(subject, asNames, aNames) {
+  return [
+    { name: 'AS Level subject content', groups: [numberedGroup(subject, 1, asNames)] },
+    { name: 'A Level subject content', groups: [numberedGroup(subject, asNames.length + 1, aNames)] },
+  ];
+}
+
+const economicsSections = courseSections('economics', [
+  'Basic economic ideas and resource allocation', 'The price system and the microeconomy',
+  'Government microeconomic intervention', 'The macroeconomy',
+  'Government macroeconomic intervention', 'International economic issues',
+], [
+  'The price system and the microeconomy', 'Government microeconomic intervention',
+  'The macroeconomy', 'Government macroeconomic intervention', 'International economic issues',
+]);
+
+const businessSections = courseSections('business', [
+  'Business and its environment', 'Human resource management', 'Marketing', 'Operations management', 'Finance and accounting',
+], [
+  'Business and its environment', 'Human resource management', 'Marketing', 'Operations management', 'Finance and accounting',
+]);
+
 function publishedEditions(sections, files) {
   return Object.fromEntries(Object.entries(files).map(([edition, file]) => [
     edition, { source: cambridge + file, sections },
@@ -205,4 +228,16 @@ export const syllabusSubjects = [
     },
   },
   mathematicsSubject,
+  {
+    id: 'economics', name: 'Economics', icon: 'chart', code: '9708',
+    description: 'Markets, policy and the global economy.',
+    syllabus: { source: cambridge + '697423-2026-2028-syllabus.pdf', sections: economicsSections },
+    practiceNote: 'Starter questions across the main 2026–2028 syllabus topics. Economics exams also include data response and essays.',
+  },
+  {
+    id: 'business', name: 'Business', icon: 'books', code: '9609',
+    description: 'Enterprise, people, markets, operations and finance.',
+    syllabus: { source: cambridge + '697371-2026-2028-syllabus.pdf', sections: businessSections },
+    practiceNote: 'Starter quizzes across the main 2026–2028 syllabus topics. Business exams use written answers and case studies, so practise those separately too.',
+  },
 ];

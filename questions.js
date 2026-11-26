@@ -1,4 +1,6 @@
 import { physicsChallenge } from './physics-challenge.js';
+import { economicsPractice } from './economics-practice.js';
+import { businessPractice } from './business-practice.js';
 import { biologyChallenge } from './biology-challenge.js';
 import { chemistryChallenge } from './chemistry-challenge.js';
 import { archiveChallenge } from './archive-challenge.js';
@@ -389,6 +391,7 @@ const practiceBanks = [
   chemistryExtraSimple, chemistryExtraChallenge, chemistryPracticeAsCore, chemistryPracticeAsOrganic,
   chemistryPracticeAPhysicalAndArchive, chemistryPracticeAOrganic,
   biologyExtra, biologyPracticeAsCore, biologyPracticeAAndArchive, scienceExtraArchive,
+  economicsPractice, businessPractice,
 ];
 for (const bank of practiceBanks) {
   for (const item of bank) {

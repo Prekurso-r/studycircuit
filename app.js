@@ -275,6 +275,8 @@ const lineRoutes = {
   physics: [hub, [394, 200], [52, 200]],
   chemistry: [hub, [566, 200], [936, 200], [936, 18]],
   biology: [hub, [566, 372], [908, 372]],
+  economics: [hub, [480, 94], [190, 94]],
+  business: [hub, [480, 518], [820, 518]],
 };
 const mathsJunction = [334, 372];
 const mathsTrunk = [hub, [394, 372], mathsJunction];
@@ -353,9 +355,9 @@ function networkMap(nextTopicId, { list = mySubjects(), papers = takenPapers(), 
       parts.push(`<path class="net-zone" d="M${(mx - dy * 13).toFixed(1)} ${(my + dx * 13).toFixed(1)} L${(mx + dy * 13).toFixed(1)} ${(my - dx * 13).toFixed(1)}"/>`);
     }
     const [ex, ey] = route.at(-1);
-    const anchor = subject.id === 'physics' ? 'start' : 'end';
+    const anchor = ['physics', 'economics'].includes(subject.id) ? 'start' : 'end';
     const lx = subject.id === 'chemistry' ? ex - 16 : ex;
-    const ly = subject.id === 'biology' ? ey + 30 : subject.id === 'chemistry' ? ey + 6 : ey - 18;
+    const ly = subject.id === 'biology' || subject.id === 'business' ? ey + 30 : subject.id === 'chemistry' ? ey + 6 : ey - 18;
     if (!preview) labels.push(named(subject.id, `<text class="net-label ${subject.id}" x="${lx}" y="${ly}" text-anchor="${anchor}">${subject.name} ${subject.code}</text>`));
   }
   // Unvisited stations are small ticks on the line; visited ones are lit rings; the next stop is named.
@@ -584,7 +586,8 @@ function expandPhysicsDrafts(drafts, attempts) {
 // ---------- Your lines: the subjects and Maths papers the student takes ----------
 function cleanLines(value) {
   if (!value || typeof value !== 'object' || !Array.isArray(value.subjects)) return null;
-  const subjectIds = value.subjects.filter(id => subjects.some(subject => subject.id === id));
+  // A skipped chooser means all subjects, including new ones added later.
+  const subjectIds = value.skipped ? subjects.map(subject => subject.id) : value.subjects.filter(id => subjects.some(subject => subject.id === id));
   if (!subjectIds.length) return null;
   const papers = Array.isArray(value.papers) ? value.papers.filter(paper => paperNumbers.includes(paper)) : [];
   return { subjects: subjectIds, papers, skipped: Boolean(value.skipped) };
@@ -605,7 +608,7 @@ const mySubjects = () => subjects.filter(subject => takesSubject(subject.id));
 const myTopics = subject => subject.syllabus.topics.filter(topicTaken);
 
 function linesSummary() {
-  if (!state.lines || state.lines.skipped) return 'All four subjects';
+  if (!state.lines || state.lines.skipped) return 'All subjects';
   return mySubjects().map(subject => subject.id === 'mathematics' && state.lines.papers.length
     ? `${subject.name} (${state.lines.papers.map(paper => `P${paper}`).join(', ')})`
     : subject.name).join(', ');
@@ -819,6 +822,7 @@ function subjectPage(subject) {
         ${syllabus.sections[index].groups.map(syllabusGroup).join('')}
       </section>`;
   return `<div class="${subject.id}">${heading(`<span class="title-line" aria-hidden="true"></span>${subject.name}`,`${subject.code} · Cambridge International AS &amp; A Level · ${count(syllabus.topics.length, 'station')}, ${visited} visited · ${count(syllabus.questionIds.length, 'question')}`, { href: '#/subjects', label: 'All subjects' })}
+    ${subject.practiceNote ? `<p class="section-note">${escapeText(subject.practiceNote)}</p>` : ''}
     <div class="syllabus-toolbar">
       ${levelControl()}
       <div class="toolbar-actions">
@@ -1477,7 +1481,7 @@ document.addEventListener('click', event => {
   if (button.dataset.action === 'skip-lines') {
     state.lines = { subjects: subjects.map(subject => subject.id), papers: [], skipped: true };
     persist();
-    announcement.textContent = 'All four subjects kept. You can choose your lines any time on the Subjects page.';
+    announcement.textContent = 'All subjects kept. You can choose your lines any time on the Subjects page.';
     welcome.subjectsDone();
   }
   if (button.dataset.action === 'skip-heard') welcome.skipHeard();

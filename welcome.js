@@ -20,8 +20,6 @@ export const heardOptions = [
 export const heardIds = new Set(heardOptions.map(([id]) => id));
 
 const pendingKey = 'study-circuit:heard-pending';
-const lineIds = ['physics', 'chemistry', 'biology', 'mathematics'];
-const lineOf = element => lineIds.find(id => element.classList.contains(id));
 
 // One anonymous row: just the choice. No name, no email, nothing that says who chose it.
 async function postAnswer(source) {
@@ -55,6 +53,7 @@ async function sendPending() {
 
 export function createWelcome(ctx) {
   const { main, state, subjects, paperNumbers, icon, lineChooser, networkMap, persist, announce, navigate } = ctx;
+  const lineOf = element => subjects.find(subject => element.classList.contains(subject.id))?.id;
   // True once the student has been through the subjects step in this visit, so the survey can say "step 2" and offer Back.
   let throughSubjects = false;
 
