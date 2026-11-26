@@ -2,7 +2,24 @@ function rounded(value) {
   return Number(value.toPrecision(4));
 }
 
-function display(value, integer = false) {
+// Very large and very small numbers are written in scientific notation, as 2.14 × 10³⁰ and never as 2.141e+30. The switch
+// points match the "Expected" line in app.js (a million and above, below a thousandth).
+const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+
+function needsScientific(value) {
+  const size = Math.abs(value);
+  return size !== 0 && (size >= 1e6 || size < 1e-3);
+}
+
+function scientific(value) {
+  const [mantissa, exponent] = rounded(value).toExponential().split('e');
+  const power = Number(exponent);
+  const digits = String(Math.abs(power)).replace(/\d/g, digit => SUPERSCRIPT_DIGITS[digit]);
+  return `${mantissa} × 10${power < 0 ? '⁻' : ''}${digits}`.replace(/^-/, '−');
+}
+
+function display(value, integer = false, useScientific = needsScientific(value)) {
+  if (useScientific && value !== 0) return scientific(value);
   return String(integer ? value : rounded(value)).replace(/^-/, '−');
 }
 
@@ -22,18 +39,37 @@ export function scenario(prompt, simple, first, second, figure) {
   return { prompt, simple, parts: [first, second], figure };
 }
 
+// A count of exactly one takes the singular of the unit: "1 neutron", not "1 neutrons".
+const SINGULAR_UNITS = { neutrons: 'neutron', protons: 'proton', nucleons: 'nucleon', quarks: 'quark', photons: 'photon', electrons: 'electron' };
+function withUnit(shown, unit) {
+  if (!unit) return shown;
+  return `${shown} ${shown === '1' && SINGULAR_UNITS[unit] ? SINGULAR_UNITS[unit] : unit}`;
+}
+
+// The three wrong choices for a check. A check's answer and its choices are always written in one style, so a question never
+// mixes 0.000002592 with 1.296 × 10⁻⁷.
+function alternativesOf({ value, exact: integer }) {
+  return integer || value === 0
+    ? [value + 1, value - 1, value + 2]
+    : [value * 0.5, value * 2, value * 0.1];
+}
+
+function scientificFor(check) {
+  return [check.value, ...alternativesOf(check)].some(needsScientific);
+}
+
 function explanation(checks) {
-  return checks.map(({ working, value, unit, exact: integer }) =>
-    `${working} The result is ${display(value, integer)}${unit ? ' ' + unit : ''}.`
+  return checks.map(check =>
+    `${check.working} The result is ${withUnit(display(check.value, check.exact, scientificFor(check)), check.unit)}.`
   ).join(' ');
 }
 
-function choicesFor({ value, unit, exact: integer }, position) {
-  const alternatives = integer || value === 0
-    ? [value + 1, value - 1, value + 2]
-    : [value * 0.5, value * 2, value * 0.1];
+function choicesFor(check, position) {
+  const { value, unit, exact: integer } = check;
+  const alternatives = alternativesOf(check);
   alternatives.splice(position, 0, value);
-  return alternatives.map(n => display(n, integer) + (unit ? ' ' + unit : ''));
+  const useScientific = scientificFor(check);
+  return alternatives.map(n => withUnit(display(n, integer, useScientific), unit));
 }
 
 function numericPart({ label, unit, value, exact: integer }) {

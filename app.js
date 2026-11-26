@@ -950,8 +950,11 @@ function partHint(part, value) {
 function numericParts(question, response, checked) {
   const figures = Math.max(0, ...question.parts.map(figuresNeeded));
   const hint = figures ? ` Give each answer to at least ${figures} significant figures, or as an exact fraction.` : '';
+  // An answer that is shown as 1.2 × 10⁻⁶ is typed as 1.2e-6: say so, but only when such an answer is on the screen.
+  const powers = question.parts.some(part => part.answer && (Math.abs(part.answer) >= 1e6 || Math.abs(part.answer) < 1e-3))
+    ? ' For a power of ten, write 1.2 × 10⁻⁶ as 1.2e-6.' : '';
   // inputmode stays "text": phone number pads cannot type the "/" of a fraction or a minus sign on every platform.
-  return `<legend>Enter a number or fraction for each part.${hint}</legend>${question.parts.map((part, i) =>
+  return `<legend>Enter a number or fraction for each part.${hint}${powers}</legend>${question.parts.map((part, i) =>
     `<label class="numeric-part"><span><strong>(${'abc'[i]})</strong> ${richText(part.label)}</span>
       <span><input type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" data-part="${i}" value="${escapeText(response?.[i] ?? '')}"> ${richText(part.unit)}</span></label>
       ${checked ? `<p class="part-result">${correctPart(part, response[i]) ? `${stationMark('done')}Correct` : `${stationMark('miss')}Expected ${formatAnswer(part.answer)} ${richText(part.unit)}`}</p>${partHint(part, response[i])}` : ''}`).join('')}`;

@@ -338,7 +338,7 @@ export const why = {
     '7π/12 is 105°, half of 210°. The conversion is 210 × π/180 = 7π/6.',
     null,
     '5π/6 is 150°. An angle of 210° is more than 180°, so the answer must be more than π.',
-    '7π/3 is 420°, twice the right angle.',
+    '7π/3 is 420°, which is double 210°. Multiply 210 by π/180 once to get 7π/6, with no extra factor of 2.',
   ],
   'math-1-4-radians-to-degrees': [
     '30° is π/6, which is 2π/12. Multiplying 5π/12 by 180/π gives 5 × 15 = 75°.',
@@ -416,7 +416,7 @@ export const why = {
     null,
     '23.18 is the area of the whole sector, 12.5θ. The triangle still has to be taken away.',
     '12 is the area of the triangle, not of the segment.',
-    '5.59 is half of the right area, 11.18.',
+    '5.59 is half of 11.18. The segment is the sector 23.18 minus the triangle 12, which is 11.18, so no extra halving is needed.',
   ],
   'math-1-4-equal-area-sectors': [
     'This is the ratio of the radii. For equal areas A = ½rs, so the longer radius goes with the shorter arc.',
@@ -598,19 +598,19 @@ export const why = {
     'The terms grow in size when the ratio is −1.5, so they never settle. Convergence needs a ratio between −1 and 1.',
     'A ratio of 1 gives the same term every time, so the sum keeps growing without limit.',
     null,
-    'A ratio of −1 swings between a and −a, so the partial sums never settle on one value.',
+    'With ratio −1 the terms swing between a and −a, so the partial sums alternate between a and 0 and never settle on one value.',
   ],
   'math-1-6-infinite-sum-alternating': [
     '12/(1 − 1/3) = 18 uses a positive ratio. The signs alternate, so the ratio is −1/3.',
     '8 is 12 − 4, the sum of the first two terms only. The sum to infinity includes every term.',
-    '16 is 12 + 4, which ignores the alternating signs.',
+    '16 is 12 + 4, the first two terms with both counted as positive. The sum to infinity is 12/(1 − r) with r = −1/3, which gives 9.',
     null,
   ],
   'math-1-6-scaled-binomial-coefficient': [
     'The sign is wrong. The x³ term contains (−3x)³, which is negative.',
     '−540 is 20 × (−27), without the factor 2³ = 8 from the three other brackets.',
     null,
-    '−1440 uses (−3)² = 9 where the term needs (−3)³ = −27. Three factors of −3x give x³.',
+    '−1440 is a third of the right size, because 9 was used where 27 belongs. The x³ term needs (−3)³ = −27, giving 20 × (−27) × 8 = −4320.',
   ],
   'math-1-6-cancelling-binomial-terms': [
     '80 is the x² coefficient of (2 − x)⁵ on its own. Multiplying by x also contributes the x coefficient, −80.',
@@ -622,7 +622,7 @@ export const why = {
     null,
     '375 uses 51 as the last term, which is the 14th term. The fifteenth term is 55.',
     '420 uses +1 as the first term. The first term is 11 − 3 × 4 = −1.',
-    '435 uses 3 as the first term, which is the third term. The first term is 11 − 3 × 4 = −1.',
+    '435 treats 3 as the first term, but 3 is only the second term. Counting back three steps of 4 from the fourth term, 11, gives the first term −1.',
   ],
   'math-1-6-arithmetic-threshold': [
     'At n = 7 the sum is 7 × 22/2 = 77, which is less than 100.',
@@ -656,7 +656,7 @@ export const why = {
   ],
   // ---- 1.7 Differentiation ----
   'math-1-7-differentiate-rational-power': [
-    'The coefficient has not been multiplied by the power. 5 × 3/2 = 15/2, with the new power 1/2.',
+    '5/2 is 5 × 1/2, which uses the new power instead of the original power. The coefficient is multiplied by the original power 3/2, giving 15/2.',
     'The power has not been reduced by 1. x^(3/2) becomes x^(1/2).',
     '15 uses only the numerator of the power 3/2. The coefficient is multiplied by the whole power: 5 × 3/2.',
     null,
@@ -826,8 +826,8 @@ export const why = {
   ],
   'math-1-8-area-line-parabola': [
     null,
-    '16/3 is half of the area. The region runs from x = −1 to x = 3, a width of 4.',
-    '32 loses the division by 3 in the −x³/3 term of the antiderivative.',
+    '16/3 is half of the true area. The area is 32/3, so there is no extra factor of ½ to apply.',
+    '32 is three times the true area. Integrating 2x + 3 − x² from −1 to 3 gives 9 − (−5/3) = 32/3, so the answer keeps its denominator of 3.',
     '10 is not exact. ∫(2x + 3 − x²) dx from −1 to 3 is 32/3, which is about 10.67.',
   ],
   'math-1-8-area-both-sides-of-axis': [
@@ -838,7 +838,7 @@ export const why = {
   ],
   'math-1-8-sum-definite-integral': [
     'The √2 from the lower limit is subtracted, not added, because the lower value is taken away.',
-    '22 is only the value of the antiderivative at x = 8. The value at x = 1, which is √2 + 9/2, must be subtracted.',
+    'The √2 from the lower limit was subtracted but the 9/2 was not. The lower value is √2 + 9/2, so the result is 22 − √2 − 9/2 = 35/2 − √2.',
     null,
     'The second term contributes (9/2)(4 − 1) = 27/2, which with 4 − √2 makes 35/2 − √2, not 31/2 − √2.',
   ],
@@ -1033,20 +1033,20 @@ export const why = {
   'math-2-2-two-exponential-bases': [
     'At x = 0.691, 5^(x + 1) is about 15.2 but 8^(2x − 1) is about 2.2, so the two sides are not equal.',
     'At x = 1.277, 5^(x + 1) is about 39 but 8^(2x − 1) is about 25, so the two sides are not equal.',
-    'At x = 2.168, 5^(x + 1) is about 164 but 8^(2x − 1) is about 1028, so the two sides are not equal.',
+    'At x = 2.168, 5^(x + 1) is about 164 but 8^(2x − 1) is about 1030, so the two sides are not equal.',
     null,
   ],
   'math-2-2-competing-growth-rates': [
     null,
     'ln(9/7) is positive, so dividing by it keeps the direction of the inequality. The solution is x greater than the boundary.',
-    '3.89 is 2 ln 7, the right-hand side before dividing by the coefficient ln(9/7). The boundary is about 11.11.',
+    '3.89 is 2 ln 7 on its own. The right-hand side is 2 ln 7 − ln 3 ≈ 2.79, and it still has to be divided by ln(9/7) ≈ 0.251 to reach the boundary 11.11.',
     'Both the sign and the direction are wrong. The boundary is positive, and the solution is above it.',
   ],
   'math-2-2-decreasing-base-inequality': [
     null,
     'Dividing by −2 reverses the inequality, so 1 − 2x ≥ 2 gives x ≤ −1/2, not x ≥ −1/2.',
     'The exponent of 3 is 1 − 2x, not 2x − 1. Using 2x − 1 = 2 gives 3/2, which is not the end point.',
-    'This takes 2x − 1 as the exponent of 3 and also keeps the wrong direction.',
+    'This treats (1/3)^(2x − 1) as if its base were 3. Writing 1/3 as 3⁻¹ gives the exponent 1 − 2x, and dividing by −2 then reverses the inequality.',
   ],
   'math-2-2-substitute-power': [
     '1 and 4 are the values of u = 2^x, not of x. Solve 2^x = 1 and 2^x = 4.',
@@ -1295,7 +1295,7 @@ export const why = {
     'The factor 4 has been multiplied in. It has to be divided out.',
     'The factor 1/4 is missing. Differentiating this would give 4e^(4x − 3).',
     null,
-    'This treats the exponent like a power. e^u integrates to e^u divided by the derivative of u.',
+    'Dividing by the whole exponent 4x − 3 treats it like a power. The divisor is the constant 4, the derivative of the exponent, which only works because the exponent is linear.',
   ],
   'math-2-5-integrate-linear-reciprocal': [
     null,
@@ -1389,7 +1389,7 @@ export const why = {
   ],
   'math-2-5-cosine-product-integral': [
     null,
-    'sin(2x)/4 at x = π/4 is 1/4. Halving it to 1/8 loses the term.',
+    'The factor ½ from the identity is already inside sin(2x)/4, so it must not be applied again. At x = π/4 that term is 1/4, and the sin(4x)/8 term is 0.',
     '1/2 doubles the correct value of 1/4. Only the sin(2x)/4 term contributes, because sin π = 0.',
     'sin(4x) is 0 at x = π/4, but sin(2x) = 1 there, so the second term gives 1/4.',
   ],
@@ -1414,7 +1414,7 @@ export const why = {
   ],
   'math-2-6-limit-equation': [
     null,
-    'Squaring L = √(5 + L) gives L² = 5 + L, which rearranges to L² − L − 5 = 0. The sign of L is negative, not positive.',
+    'Squaring L = √(5 + L) gives L² = 5 + L, so L moves across with a minus sign: L² − L − 5 = 0, not L² + L − 5 = 0. The condition L ≥ 0 is correct.',
     'A square root is never negative, so the limit has to satisfy L ≥ 0.',
     'L = 5 would give √(5 + 5), which is about 3.16, not 5. The limit satisfies L² − L − 5 = 0.',
   ],
@@ -1467,7 +1467,7 @@ export const why = {
     'L = 6 would give 6/(1 + 6) = 6/7, not 6.',
   ],
   'math-2-6-iteration-rearrangements-compared': [
-    'It is the other way round. Iteration A grows without limit: −6, 30, 894.',
+    'Iteration A does not approach 3, since it runs away through −6, 30 and 894. Iteration B does not alternate. It climbs steadily towards 3.',
     'B reaches only 2.449, 2.907 and 2.984 in three steps. These are close to 3 but not equal to it.',
     'B uses a positive square root, so it can never approach −2. B approaches 3 and A runs away.',
     null,
@@ -1497,7 +1497,7 @@ export const why = {
     '2.090 is far below the bracket 2.09455 to 2.09456.',
   ],
   'math-2-6-rounded-limit-from-verified-bracket': [
-    'Every number above 2.7905 rounds to 2.791, so the bracket 2.7905 to 2.7915 cannot round to 2.790.',
+    'Every number strictly between 2.7905 and 2.7915 rounds to 2.791, so the root cannot round to 2.790.',
     null,
     '2.792 is outside the bracket, and squaring x = √(x + 5) gives x² = x + 5, so the equation x² + x − 5 = 0 is wrong too.',
     'The rounding is right, but squaring x = √(x + 5) gives x² = x + 5, which is x² − x − 5 = 0, not x² + x − 5 = 0.',
@@ -1607,7 +1607,7 @@ export const why = {
   ],
   'math-3-1-adapted-cube-root': [
     null,
-    'Every term is half of what it should be. The factor 8^(1/3) = 2 multiplies all of them, including the 1.',
+    'Only the constant term has been multiplied by 8^(1/3) = 2. The x and x² terms of (1 + x/2)^(1/3) must be doubled as well, giving x/3 and −x²/18.',
     'The sign of the x² term is wrong. (1/3)(−2/3) is negative, so the term is subtracted.',
     'The condition is |x/2| < 1, which gives |x| < 2. The interval −1/2 < x < 1/2 would come from |2x| < 1.',
   ],
@@ -1615,7 +1615,7 @@ export const why = {
     '3/2 leaves out the 3x × x term, which is worth 3.',
     null,
     '3 leaves out the 1 × 3x²/2 term, which is worth 3/2.',
-    'The sign is wrong. The x and x² terms of (1 − 2x)^(−1/2) are +x and +3x²/2.',
+    'The x and x² terms of (1 − 2x)^(−1/2) are +x and +3x²/2, so every contribution is positive. The coefficient is 3 + 3/2 = 9/2, which cannot be negative.',
   ],
   // ---- 3.2 Logarithmic and exponential functions ----
   'math-3-2-log-base-four': [
@@ -1652,7 +1652,7 @@ export const why = {
     'The 2 multiplies x, so it divides ln 5. It does not divide 5.',
     null,
     'The 2 is divided, not multiplied. 2x = ln 5 gives x = (ln 5)/2.',
-    'Dividing by 3 first gives e^(2x) = 5, not e^(2x) = 15.',
+    'The 3 has to be divided out before taking logs, which gives e^(2x) = 5. Dividing ln 15 by 3 is not the same as taking ln 5, so this method does not work.',
   ],
   'math-3-2-same-base-inequality': [
     null,
@@ -1770,7 +1770,7 @@ export const why = {
     null,
   ],
   'math-3-3-cosine-sum-identity': [
-    'This is the formula for cos(A − B). The plus sign is the difference formula.',
+    'Adding the product of the sines gives cos(A − B), not cos(A + B). For cos(A + B) the product of the sines is subtracted.',
     'This is the formula for sin(A + B), not cos(A + B).',
     null,
     'This is the negative of cos(A + B). The sines are subtracted from the cosines, not the other way round.',
@@ -1791,7 +1791,7 @@ export const why = {
     't = 1/2 or 2 gives t + 1/t = 5/2, not 10/3.',
     null,
     'tan x is positive for 0° < x < 90°, so negative values are impossible.',
-    't = 3/10 gives 3/10 + 10/3 = 109/30, not 10/3. The values of 10/3 are a sum, not the roots.',
+    '10/3 is the value of t + 1/t, not a root. Putting t = 3/10 gives 3/10 + 10/3 = 109/30, so the roots come from solving 3t² − 10t + 3 = 0.',
   ],
   'math-3-3-secant-quadratic-equation': [
     null,
@@ -1959,7 +1959,7 @@ export const why = {
   ],
   'math-3-5-reciprocal-linear-antiderivative': [
     null,
-    'The sign is wrong. ln|5 − 2x| differentiates to −2/(5 − 2x), which is negative.',
+    'Differentiating ln|5 − 2x|/2 gives −1/(5 − 2x), which has the opposite sign to the integrand. The inner derivative is −2, so the factor needed is −1/2.',
     'The factor −2 has been multiplied in. It has to be divided out, giving −1/2.',
     'A reciprocal integrates to a logarithm, not to a reciprocal squared.',
   ],
@@ -2003,7 +2003,7 @@ export const why = {
     'The lower limit has not been subtracted. At u = 0 the antiderivative e^u is 1.',
     null,
     'du = 3x² dx already includes the 3, so there is no extra factor 3.',
-    '1 would be the integral of 1. The integral of e^u from 0 to 1 is e − 1.',
+    '1 is e⁰, the value at the lower limit alone. The integral is the upper value minus the lower value, e¹ − e⁰ = e − 1, which is about 1.72.',
   ],
   'math-3-5-parts-linear-exponential': [
     '(x + 1)e^x differentiates to (x + 2)e^x, not to xe^x.',
@@ -2013,8 +2013,8 @@ export const why = {
   ],
   'math-3-5-integrate-two-fractions': [
     null,
-    'ln 2 is not the value. The terms give ln(3/2) + 2 ln(4/3), which is ln(8/3).',
-    'ln(4/3) is only one part. The second term has a factor 2, so it contributes 2 ln(4/3).',
+    'ln 2 appears if the factor 2 on the 1/(x + 3) term is dropped, since ln(3/2) + ln(4/3) = ln 2. With the 2 the total is ln(8/3).',
+    'ln(4/3) is the integral of 1/(x + 3) without its factor 2, and the ln(3/2) from the 1/(x + 2) term is missing as well. Both parts are needed.',
     'ln(3/8) is upside down. The upper limit value is taken minus the lower limit value, which gives ln(8/3).',
   ],
   'math-3-5-integrate-repeated-fraction': [
@@ -2061,7 +2061,7 @@ export const why = {
   ],
   'math-3-5-substitution-trig-limits': [
     'The term (√2/2)⁵ = √2/8 is subtracted from 1, not added.',
-    'This does not follow from (2/5)[1 − (√2/2)⁵]. The factor is 2/5, which gives (8 − √2)/20.',
+    'This needs (√2/2)⁵ to be √2/4, but it is √2/8. Then (2/5)(1 − √2/8) = (8 − √2)/20.',
     'The factor 2 from sin 2x = 2 sin x cos x has been lost, which halves the answer.',
     null,
   ],
@@ -2111,7 +2111,7 @@ export const why = {
   'math-3-6-read-iteration-index': [
     '1.52 is x₂, not x₃. The entry at n = 3 is 1.48.',
     null,
-    'The table gives x₃ = 1.48 and x₂ = 1.52, so the change is not +0.01.',
+    '1.49 and +0.01 are x₄ and x₄ − x₃, one step too far along the table. For x₃ the value is 1.48, and x₃ − x₂ = 1.48 − 1.52 = −0.04.',
     'x₃ = 1.48 is right, but 1.48 − 1.52 is negative, so the change is −0.04.',
   ],
   'math-3-6-iteration-cycle': [
@@ -2142,7 +2142,7 @@ export const why = {
     'At x = 2, ln 2 is about 0.69 and 3 − 2 = 1, so ln x is still below. At x = 3, ln 3 is above 0. The crossing is between 2 and 3.',
     '0.693 is ln 2. The update is 3 − ln 2, which is about 2.307.',
     null,
-    '2.164 is not 3 − ln 2. The update is 3 − 0.693 = 2.307.',
+    '2.164 is the second update, 3 − ln 2.307, not the first. The first update from x₀ = 2 is 3 − ln 2 = 3 − 0.693 = 2.307.',
   ],
   'math-3-6-reciprocal-cycle-and-root': [
     'Averaging two estimates does not prove a root. √3 is about 1.732, not 1.75.',
@@ -2383,9 +2383,9 @@ export const why = {
   ],
   'math-3-9-modulus-and-conjugate': [
     '17 is 5 + 12. The modulus squares each part first: √(25 + 144) = 13.',
-    'z* = −5 − 12i is −z. A conjugate changes only the sign of the imaginary part.',
+    'Both signs have been flipped, giving −5 − 12i. The conjugate keeps the real part 5 and changes only the sign of the imaginary part, giving 5 + 12i.',
     null,
-    '169 is |z|², not |z|. The modulus is its square root.',
+    '169 is |z|², not |z|, so a square root is still needed to reach 13. The conjugate 5 − 12i is z itself, and it should change the sign of the imaginary part to give 5 + 12i.',
   ],
   'math-3-9-principal-argument-quadrant-two': [
     'π/4 is the argument of 1 + i, in the first quadrant. −1 + i lies in the second.',
@@ -2400,7 +2400,7 @@ export const why = {
     'The imaginary part is −2 − 1 = −3. The sign has been reversed.',
   ],
   'math-3-9-cartesian-multiplication': [
-    'The real part is 3 − (−8) = 11. −8i² is +8, because i² = −1.',
+    '−5 treats −8i² as −8. Since i² = −1, the term −8i² is +8, so the real part is 3 + 8 = 11, not 3 − 8.',
     null,
     'The cross terms are −12i + 2i = −10i, which is negative.',
     'This leaves out the cross terms. All four products have to be added.',
@@ -2412,7 +2412,7 @@ export const why = {
     'The denominator is 5, so 5 + 15i has to be divided by 5.',
   ],
   'math-3-9-read-argand-point': [
-    'The real and imaginary parts are swapped, and a sign is wrong. The real part is the horizontal coordinate, 2.',
+    'The two parts are swapped, with their signs kept. Read 2 on the horizontal real axis and −3 on the vertical imaginary axis to get 2 − 3i.',
     null,
     'The vertical coordinate is −3, so the imaginary part is negative.',
     'The horizontal coordinate is +2, so the real part is 2, not −2.',
@@ -2524,7 +2524,7 @@ export const why = {
     '0.35 is the coefficient, which has no units. The force is 0.35 times the reaction.',
     null,
     '40 N is the normal reaction R. Friction is the fraction 0.35 of it.',
-    'Friction is a fraction of R, so it cannot be larger than R = 40 N.',
+    'Here μ = 0.35 is less than 1, so friction is smaller than the normal reaction of 40 N, and 114 N is far too big. The correct value is μR = 0.35 × 40 = 14 N.',
   ],
   'math-4-1-coefficient-at-limit': [
     '0.18 would need a normal component of 100 N. The normal component is 60 N.',
@@ -2664,7 +2664,7 @@ export const why = {
     'Each cart receives an impulse from the other, so its own momentum changes. Only the total stays fixed.',
     null,
     'Speeds have no direction, so their sum does not track momentum. A cart can slow, stop or reverse.',
-    'Magnitudes ignore direction. Signed momenta can cancel, but magnitudes always add.',
+    'Magnitudes ignore direction, so this sum can change. If equal and opposite momenta cancel, as when two carts stick and stop, the total of the magnitudes falls to zero.',
   ],
   'math-4-3-momentum-of-second-cart': [
     '+7 is 8 − 1. The first cart has −1, so subtracting it gives 8 − (−1) = 9.',
@@ -2772,7 +2772,7 @@ export const why = {
   ],
   'math-4-5-speed-after-vertical-drop': [
     '1.8 is the drop in metres, not a speed.',
-    '3.6 is 2 × 1.8. The speed comes from v² = 36, so a square root is needed.',
+    '3.6 is 2 × 1.8, with g left out. Energy conservation gives v² = 2gh = 2 × 10 × 1.8 = 36, and the speed is the square root, 6 m s⁻¹.',
     '4.24 is √18, from v² = gh. Equating mgh to ½mv² gives v² = 2gh.',
     null,
   ],
@@ -2784,7 +2784,7 @@ export const why = {
   ],
   'math-4-5-instantaneous-power-from-traction': [
     null,
-    '2.91 kW rests on 1600 ÷ 5.5, and even that quotient is 0.291 kW. Power is F × v, not F ÷ v.',
+    '2.91 kW has the digits of 1600 ÷ 5.5 = 290.9, which is a division. Power is the product F × v = 1600 × 5.5 = 8800 W.',
     '1.6 kW is the force 1600 N rewritten, with no speed in it. Power needs F × v.',
     '0.291 kW is 1600 ÷ 5.5, a division. Power is the product F × v.',
   ],
@@ -2833,15 +2833,15 @@ export const why = {
   ],
   'math-5-1-spread-comparison': [
     'The same mean says nothing about the medians, so the median of batch A could be higher or lower.',
-    'Standard deviation does not depend on how many items there are.',
-    'A larger standard deviation points to more spread in batch A, not a smaller range.',
+    'Standard deviation measures how spread out the values are, not how many there are, so this comparison cannot show which batch has fewer items.',
+    'A larger standard deviation suggests batch A is more spread out. The comparison does not give either range, so it cannot show which is smaller.',
     null,
   ],
   'math-5-1-modal-class': [
-    'The class 0 ≤ t < 10 has a frequency below 16, the greatest.',
+    'This class has frequency 5, which is less than the greatest frequency, 16, so it is not the modal class.',
     null,
-    'The class 20 ≤ t < 30 has a frequency below 16, the greatest.',
-    'The class 30 ≤ t < 40 has a frequency below 16, the greatest.',
+    'This class has frequency 11, which is less than the greatest frequency, 16, so it is not the modal class.',
+    'This class has frequency 8, which is less than the greatest frequency, 16, so it is not the modal class.',
   ],
   'math-5-1-coded-mean': [
     null,
@@ -2929,7 +2929,7 @@ export const why = {
     '720 is 6!. Fixing both ends leaves five runners to arrange, not six.',
   ],
   'math-5-2-repeated-code-digits': [
-    '18 is 6 × 3. The six choices for every position are multiplied together, not added to a 3.',
+    '18 is 6 × 3, which multiplies the choices by the number of positions. Each position has 6 choices, so the codes number 6 × 6 × 6.',
     '20 is ⁶C₃, which chooses different digits without order. The code has an order and allows repeats.',
     '120 is 6 × 5 × 4, which stops a digit being used twice. The question allows repeats.',
     null,
@@ -2942,7 +2942,7 @@ export const why = {
   ],
   'math-5-2-nonzero-first-digit': [
     '24 is 4 × 3 × 2 × 1. There are five digits, and only the first place excludes zero.',
-    '80 has only three factors. A four-digit integer has four places to fill.',
+    '80 comes from multiplying only three numbers, such as 5 × 4 × 4, but a four-digit integer has four places to fill.',
     null,
     '120 is 5 × 4 × 3 × 2, which allows zero in the first place. A four-digit integer cannot start with 0.',
   ],
@@ -3107,7 +3107,7 @@ export const why = {
     null,
     '4/11 is 180/495. There are 270 selections with all three colours, and 270/495 = 6/11.',
     '9/11 is 405/495. That is more than the 270 selections that have all three colours.',
-    '20/33 is 300/495. The selections with a repeated colour add to 270, not 300.',
+    '20/33 is 300/495, but only 270 of the 495 selections contain all three colours (120 + 90 + 60), so 20/33 is too large.',
   ],
   'math-5-3-two-bags': [
     '0.20 is only the Bag A path. The Bag B path adds another 0.1.',
@@ -3119,7 +3119,7 @@ export const why = {
     '2/5 is the probability of success on Monday, 0.40. The condition that exactly one success occurs changes it.',
     '7/25 is 0.28, the joint probability. It has to be divided by P(exactly one success) = 0.46.',
     null,
-    '3/7 is 0.30 ÷ (0.40 + 0.30), which ignores the failure on the other day.',
+    '3/7 is 0.30 ÷ (0.40 + 0.30), which is Tuesday’s share of the two success chances and ignores the failure on the other day. The probability for Monday is 0.28 ÷ 0.46.',
   ],
   'math-5-3-event-pair-relations': [
     'A and B share the scores 2 and 4, so they are not mutually exclusive.',
@@ -3366,7 +3366,7 @@ export const why = {
   ],
   'math-6-1-scale-to-minutes': [
     '3.73 is 2.8 ÷ 0.75. A shorter period has a smaller mean, so the rate is multiplied by 0.75.',
-    '0.0622 is 2.8 ÷ 45, the rate per minute. It has to be multiplied by 45.',
+    '0.0622 is 2.8 ÷ 45, which divides by the number of minutes and is not a rate per minute. Scale the hourly mean by 45 ÷ 60 = 0.75 instead, which gives 2.1.',
     null,
     '2.8 is the mean for a full hour. 45 minutes is a shorter period.',
   ],
@@ -3408,7 +3408,7 @@ export const why = {
   ],
   'math-6-1-count-in-two-windows': [
     null,
-    '0.25 is the chance that one particular request falls in the first 10 minutes. Either of the two requests can be the one, so there are 2 ways.',
+    '0.25 is the chance that one particular request falls in the first 10 minutes. Exactly one early means the other is late, in either order, so the answer is 2 × 0.25 × 0.75.',
     '0.0625 is 0.25², the chance that both requests fall in the first 10 minutes.',
     '0.5 would need the first 10 minutes to be half of the period. It is a quarter, so p = 0.25.',
   ],

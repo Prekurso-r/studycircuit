@@ -320,7 +320,7 @@ export const why = {
     null,
     '0.0100 mol is ten times too small. It would need a volume of 0.250 dm³, not 2.50 dm³.',
     '1.00 mol would need about 25 dm³ at these conditions, ten times the 2.50 dm³ given.',
-    '100 matches the pressure in kPa in number, which cannot be an amount. Moles come from pV ÷ RT.',
+    '100 mol comes from using the pressure in Pa with the volume in dm³. The units must match, so convert 2.50 dm³ to 0.00250 m³ (or use kPa with dm³), which gives 0.100 mol.',
   ],
   'chemistry-4-q2': [
     'These are the conditions where a real gas behaves most ideally. Fast particles far apart barely attract each other.',
@@ -365,7 +365,7 @@ export const why = {
     'Gas particles move freely past one another and spread out, unlike the particles in a solid.',
   ],
   'chemistry-4-practice-gas-volume-in-metres': [
-    '0.450 m³ divides by 1000, as when changing cm³ to dm³, instead of by 10⁶. It is 450 dm³.',
+    '0.450 comes from dividing by 1000, which only converts cm³ to dm³. To reach m³ you must divide by 10⁶, because 1 m³ is 10⁶ cm³.',
     null,
     '4.50 × 10⁻² m³ divides by 10⁴, as if a cubic metre were 100² cm³. A cubic metre is 100³ cm³.',
     '4.50 × 10⁻⁵ m³ divides by 10⁷, which is one power of ten too many.',
@@ -403,7 +403,7 @@ export const why = {
   'chemistry-4-practice-conducting-soluble-crystals': [
     'P conducts when molten, which fits an ionic lattice and not separate molecules. Q has a low melting point, which fits a molecular solid.',
     'Metals conduct when solid. P conducts only when molten, so it is not metallic, and R conducts as a solid, so it is the metal.',
-    'A giant covalent lattice has no mobile ions, but P conducts when molten. Q has a low melting point, which a giant metallic lattice would not.',
+    'P conducts when molten, so it has mobile ions and is not giant covalent. Q does not conduct as a solid, so it is not a metal, and its low melting point fits a simple molecular solid.',
     null,
   ],
   // ---- 6 Electrochemistry ----
@@ -420,7 +420,7 @@ export const why = {
     'Cu is the product of the reduction. The reducing agent is on the left of the equation.',
   ],
   'chemistry-6-challenge-1': [
-    '0.00288 is 0.0720 ÷ 25.0, which divides by the volume in cm³. The volume has to be in dm³, 0.0250.',
+    '0.00288 mol dm⁻³ is 25 times too small. The concentration is 0.00180 mol of Fe²⁺ divided by 0.0250 dm³, which is 0.0720 mol dm⁻³, with no extra division by 25.',
     '0.0144 is 0.000360 ÷ 0.0250, which leaves out the factor of 5. Each permanganate ion oxidises five Fe²⁺ ions.',
     '0.360 multiplies by 5 a second time. The factor of 5 is already included in the 0.00180 mol of Fe²⁺.',
     null,
@@ -553,7 +553,7 @@ export const why = {
     '+4546 is the same sum with the sign changed. It still adds the two values, where the combustion of propane should be subtracted.',
   ],
   'chemistry-5-practice-standard-temperature-and-pressure': [
-    '273 K belongs to the older STP definition for gas volumes. Standard enthalpy changes use 298 K.',
+    '273 K and 101 kPa are the conditions used for gas volumes (STP). Standard enthalpy changes are defined at 298 K, so this temperature is wrong here.',
     'The temperature is right, but 1.01 kPa is a hundred times too low. The standard pressure is 101 kPa.',
     null,
     '373 K is the boiling point of water. Standard enthalpy changes use 298 K and 101 kPa.',
@@ -585,7 +585,7 @@ export const why = {
   'chemistry-5-practice-ethanol-combustion-from-formation': [
     null,
     '−1922 is −1644.4 − 277.7, which adds the formation enthalpy of ethanol. The reactants are subtracted.',
-    '−810 is much smaller in size than the correct value. The products total −1644.4 kJ and the ethanol takes back only 277.7 kJ of that.',
+    '−810 is far too small in size. The products give −1644.4 kJ, and subtracting the reactant value of −277.7 kJ gives −1366.7 kJ, so no correct step leads to −810.',
     '+1367 has the right size but the wrong sign. Burning ethanol releases energy, so ΔH°c is negative.',
   ],
   'chemistry-5-practice-estimate-double-bond-energy': [
@@ -633,7 +633,7 @@ export const why = {
   ],
   'chemistry-extra-simple-weak-acid-equivalence': [
     'A pH below 7 would be expected for a strong acid with a weak base. Here the salt is ethanoate, which makes the solution alkaline.',
-    'A pH of exactly 7 is found only for a strong acid with a strong base. Ethanoate ions react with water, so the solution is not neutral.',
+    'At equivalence the solution contains ethanoate ions, which react with water to give OH⁻, so the pH is above 7. A pH of 7 is the usual result for a strong acid with a strong base.',
     'A pH of 14 would need a very concentrated strong alkali. At equivalence the solution is only weakly alkaline.',
     null,
   ],
@@ -650,7 +650,7 @@ export const why = {
     'A rigid vessel keeps the reacting gases at the same partial pressures, so nothing shifts there. Under the piston the shift is towards SO₂ and O₂, not SO₃.',
   ],
   'chemistry-7-practice-reversible-arrow': [
-    'The arrow shows a reaction that has not gone to completion. A finished reaction would be drawn with a single arrow.',
+    'The arrow does not mean the reaction has finished. It shows that products can turn back into reactants, and at equilibrium both directions carry on at equal rates.',
     'The arrow says nothing about the enthalpy change. Reversible reactions can be exothermic or endothermic.',
     'Equilibrium concentrations are constant but not necessarily equal. The arrow only shows that both directions occur.',
     null,
@@ -755,7 +755,7 @@ export const why = {
   'chemistry-8-practice-activation-energy-definition': [
     'That is the enthalpy change, ΔH. The activation energy is the barrier from the reactants up to the transition state.',
     'The mean kinetic energy depends on temperature. The activation energy is a fixed property of the reaction.',
-    'Reactants do not gain energy by reacting. The barrier is the least energy that colliding particles need before a reaction can happen.',
+    'Activation energy is the energy needed to get a reaction started, not an energy gained afterwards. It is the least energy colliding particles need for an effective collision.',
     null,
   ],
   'chemistry-8-practice-collision-orientation': [
@@ -789,9 +789,9 @@ export const why = {
     'g² s⁻¹ has the mass squared. A gradient is a change in mass over a change in time, with mass to the first power.',
   ],
   'chemistry-8-practice-concentration-controlled-pair': [
-    'Trials 1 and 2 change more than the concentration of A, so the time cannot be linked to concentration alone.',
+    'Trials 1 and 2 have the same concentration of A (0.10 mol dm⁻³) and differ only in temperature, so they test temperature, not concentration.',
     'Trials 2 and 3 do not differ only in the concentration of A, so the comparison is not a fair test.',
-    'Trials 3 and 4 differ in something besides the concentration of A, so the result could not be blamed on concentration.',
+    'Trials 3 and 4 have the same concentration of A (0.20 mol dm⁻³) and differ only in the catalyst, so they test the catalyst, not concentration.',
     null,
   ],
   'chemistry-8-practice-energy-diagram-exothermic': [
@@ -864,7 +864,7 @@ export const why = {
   'chemistry-10-practice-calcium-nitrate-decomposition': [
     null,
     'Group 2 nitrates give nitrogen dioxide and oxygen, not nitrogen.',
-    'Nitrites form from Group 1 nitrates. There is also no carbon in calcium nitrate, so carbon dioxide cannot form.',
+    'Sodium and potassium nitrates give nitrites on heating, but Group 2 nitrates give an oxide. Calcium nitrate has no carbon, so no carbon dioxide can form.',
     'There is no carbon in calcium nitrate, so calcium carbonate cannot form.',
   ],
   'chemistry-10-practice-sulfate-solubility-minimum': [
@@ -907,7 +907,7 @@ export const why = {
     null,
     'Barium carbonate is the most stable, so it has the highest decomposition temperature, and a carbonate cannot form a nitrate.',
     'No Group 2 carbonate releases oxygen. All three give the oxide and carbon dioxide.',
-    'Magnesium carbonate decomposes most easily, not least, and it gives the oxide, not the hydroxide.',
+    'Magnesium carbonate is the easiest of the three to decompose, so it has the lowest decomposition temperature, not the highest. It also gives MgO and CO₂, not the hydroxide.',
   ],
   // ---- 9 The Periodic Table: chemical periodicity ----
   'chemistry-9-q1': [
@@ -995,14 +995,14 @@ export const why = {
     'Neither sample is magnesium or sulfur. They are the two other solids in the table, aluminium and silicon.',
   ],
   'chemistry-9-practice-alumina-amphoteric-equations': [
-    'The first equation does not balance. Al₂O₃ has three oxide ions, so six H⁺ are needed to make three H₂O, not two.',
+    'Al₂O₃ contains three oxide ions, so it needs 6H⁺ to make 3H₂O. With only 2H⁺ the charge is +2 on the left and +6 on the right.',
     'The second equation needs only two OH⁻. With four, the charge is −4 on the left and −2 on the right.',
     null,
     'The reagents are reversed. Acid supplies H⁺, which gives Al³⁺ and water, and alkali supplies OH⁻, which gives [Al(OH)₄]⁻.',
   ],
   'chemistry-9-practice-aqueous-period-three-chlorides': [
     'This is the order of increasing pH, because Al³⁺ is the most acidic. The reason is also wrong, since Al³⁺ attracts the oxygen of water most strongly.',
-    'The chloride ions are not acidic. The pH order comes from the cations, not from the number of Cl⁻ ions.',
+    'Chloride ions do not change the pH, so the order depends on the cations. Na⁺ is the least acidic and gives the highest pH, so NaCl would have to come first in this list.',
     null,
     'Mg²⁺ is larger and less charged than Al³⁺, so it polarises water less strongly. AlCl₃ gives the most acidic solution.',
   ],
@@ -1287,7 +1287,7 @@ export const why = {
   ],
   'chemistry-14-practice-cold-oxidation-group': [
     null,
-    'Carboxyl groups form from complete cleavage, and a single carbon cannot hold two of them. Mild oxidation gives OH groups.',
+    'Carboxyl groups come from stronger oxidation that cleaves the C=C. Mild oxidation keeps the carbon chain whole and adds one OH group to each carbon of the double bond.',
     'No halogen is involved in the oxidation. Mild oxidation adds two OH groups.',
     'A nitrile needs cyanide. Mild oxidation adds two OH groups.',
   ],
@@ -1338,7 +1338,7 @@ export const why = {
     'Ethane and ethene have different formulas, C₂H₆ and C₂H₄, so they cannot be isomers.',
     'These have different formulas, C₃H₈O and C₃H₆O₂. Isomers share one molecular formula.',
     null,
-    'These have different formulas, C₂H₄ and C₃H₆, and differ by a CH₂ unit. They belong to the same series, so they are not isomers.',
+    'Ethene is C₂H₄ and propene is C₃H₆, so their molecular formulas differ by a CH₂ unit. Isomers must share one molecular formula, whatever series they belong to.',
   ],
   'chemistry-13-q2': [
     null,
@@ -1414,7 +1414,7 @@ export const why = {
   ],
   'chemistry-13-practice-name-skeletal-ketone': [
     'The numbering must give the C=O the lowest number. It is carbon 2, not 4.',
-    'Numbering from this end gives the carbonyl carbon 3, but numbering from the nearer end gives it 2.',
+    'This name puts the carbonyl on carbon 3 and the methyl on carbon 2, which describes a different ketone. The structure shown has C=O on carbon 2 and the methyl on carbon 3.',
     null,
     'The chain and the formula are one carbon too large. The ketone has six carbons, C₆H₁₂O.',
   ],
@@ -1464,7 +1464,7 @@ export const why = {
   'chemistry-extra-simple-halogenoalkane-elimination': [
     'Propane would result from replacing Br with H. Elimination removes HBr and forms a C=C.',
     'This is the substitution product, with OH in place of Br. Elimination gives an alkene.',
-    'Propyne has a C≡C, which would need loss of two HBr. Losing one HBr gives a double bond.',
+    'Propyne has a C≡C, but removing one HBr from 1-bromopropane can only make a C=C. The molecule has only one Br, so it cannot lose a second HBr.',
     null,
   ],
   'chemistry-extra-simple-tertiary-hydrolysis-first-step': [
@@ -1592,7 +1592,7 @@ export const why = {
     'Only the primary end is oxidised here. The secondary OH on carbon 2 should also become a ketone.',
     'The primary end stops at the aldehyde. Complete oxidation takes it on to the carboxylic acid.',
     null,
-    'The CH₃ end cannot become COOH without breaking carbon–carbon bonds. Carbon 2 becomes a ketone, so the CH₃ stays.',
+    'Only the two alcohol carbons are oxidised. The CH₃ end has no OH to oxidise, and carbon 2 becomes a ketone, not a CH₂ group, so this diacid cannot form.',
   ],
   'chemistry-extra-challenge-two-pentanols': [
     'Pentan-1-ol is primary and gives an aldehyde, not a ketone.',
@@ -1656,7 +1656,7 @@ export const why = {
   ],
   'chemistry-16-practice-identify-alcohol-from-burning-and-test': [
     'The formula is right, but propan-1-ol is primary, so it gives an aldehyde, which reduces Fehling’s solution.',
-    'Propan-2-ol is C₃H₈O. C₃H₆O would give only three waters from 10.0 mmol, 30.0 mmol, not 40.0 mmol.',
+    'The formula C₃H₆O would give only 30.0 mmol of water from 10.0 mmol (three H₂O per molecule), not the 40.0 mmol seen. Propan-2-ol is C₃H₈O.',
     'Four carbons would give 40.0 mmol of CO₂, not 30.0 mmol.',
     null,
   ],
@@ -1870,7 +1870,7 @@ export const why = {
     'The nitrogen has no hydrogen to lose, and the thing to remove is the negative charge on oxygen.',
     'Breaking the C–C bond would change the carbon skeleton. The charge on O⁻ is removed by adding H⁺.',
     null,
-    'Losing H⁻ would undo the addition and change the product. Hydride does not leave here.',
+    'Losing H⁻ would give R–CO–CN, an oxidation product, not the addition product. The O⁻ only needs to pick up H⁺ to become OH.',
   ],
   'chemistry-17-practice-new-chirality-on-reduction': [
     null,
@@ -1947,7 +1947,7 @@ export const why = {
   ],
   'chemistry-19-practice-ammonia-nucleophile': [
     'Ammonia is neutral. A nucleophile donates an electron pair and has no positive charge.',
-    'Hydrogen has no unpaired electron in ammonia. All the electrons are paired in bonds.',
+    'Every electron in ammonia is paired, either in an N–H bond or as the lone pair on nitrogen. The lone pair is what is donated, not an unpaired electron on hydrogen.',
     'Ammonia has no double bonds and only one nitrogen atom.',
     null,
   ],
@@ -1960,8 +1960,8 @@ export const why = {
   'chemistry-19-practice-nitrile-alkaline-organic-ion': [
     null,
     'This is the free acid. In excess alkali the acid is deprotonated, so it is present as the carboxylate ion.',
-    'This is an ethoxide ion. It has lost the nitrile carbon, which stays in the chain.',
-    'This ion keeps the nitrogen, but the organic product keeps the nitrile carbon, so it is a carboxylate and not an ammonium ion.',
+    'CH₃CH₂O⁻ has only two carbons, but propanenitrile has three and its nitrile carbon is kept. Hydrolysis forms a carboxylate ion, not an alkoxide.',
+    'CH₃CH₂NH₃⁺ would have lost the nitrile carbon. In alkali the nitrogen leaves as ammonia, and the nitrile carbon stays in the organic product as the carboxylate.',
   ],
   'chemistry-19-practice-hydroxynitrile-common-centre': [
     'The central carbon has no NH₂ or COOH. It carries OH and CN.',
@@ -1970,10 +1970,10 @@ export const why = {
     'There is no ester group. The central carbon carries OH, not an ester.',
   ],
   'chemistry-19-practice-parallel-branched-nitrogen-products': [
-    'P keeps the group at carbon 2, giving (CH₃)₂CHNH₂ with a branched chain. CH₃CH₂CH₂NH₂ has NH₂ on carbon 1.',
+    'Substitution at carbon 2 puts NH₂ on the middle carbon, giving (CH₃)₂CHNH₂. CH₃CH₂CH₂NH₂ has NH₂ on the end carbon, which would need Cl on carbon 1.',
     null,
     'P is right, but the acid from Q has four carbons, three from the chain and one from CN, in a branched chain. CH₃CH₂COOH has three.',
-    'Both have unbranched chains, with the group on carbon 1. The substitution happens at carbon 2, so the chains stay branched.',
+    'The group goes on carbon 2, not carbon 1. That gives (CH₃)₂CHNH₂ and the branched acid (CH₃)₂CHCOOH, not the products written here, which both come from carbon 1.',
   ],
   'chemistry-19-practice-compare-ketone-hydroxynitrile-geometry': [
     'The propanone product has two identical methyl groups on its carbon, so it is achiral.',
@@ -2119,7 +2119,7 @@ export const why = {
     null,
     'Reduction at the end would take ethanal back towards an alcohol, away from the target. The steps are hydration, then oxidation.',
     'Dehydration removes water, so it cannot turn ethene into an alcohol. The alcohol needs water added.',
-    'Hydrolysis needs a halogenoalkane or an ester, and elimination would form an alkene, not ethanal.',
+    'Ethene has no group to hydrolyse, and elimination would form an alkene, not ethanal. The route needs water added to give an alcohol, then oxidation.',
   ],
   'chemistry-21-challenge-1': [
     'That gives ethanol and then ethanoic acid, which still have two carbons. The target has three.',
@@ -2142,7 +2142,7 @@ export const why = {
   'chemistry-extra-challenge-isopropyl-ester-route': [
     'Hydrogenation gives propane, which has no functional group to substitute.',
     'Cleavage breaks the carbon chain, so the three carbons are not kept together.',
-    'An alkene does not esterify directly, and oxidising the ester would not place the oxygen on carbon 2.',
+    'At this level an ester forms from an alcohol and a carboxylic acid, so propene must first be hydrated. Oxidising an ester would not put the oxygen on carbon 2.',
     null,
   ],
   'chemistry-extra-challenge-branched-aldehyde-route': [
@@ -2160,7 +2160,7 @@ export const why = {
   'chemistry-21-practice-methanoic-acid-ester-stage': [
     'Hydrolysis breaks an ester apart. It is the reverse of this step.',
     'Hydrogenation adds H₂ across a double bond. Nothing here is hydrogenated.',
-    'Free-radical substitution needs UV light and an alkane with a halogen. Acids and alcohols do not react this way.',
+    'Free-radical substitution needs UV light and a halogen such as Cl₂ reacting with an alkane. An acid and an alcohol join by a condensation reaction instead.',
     null,
   ],
   'chemistry-21-practice-functional-groups-hydroxybutanal': [
@@ -2225,7 +2225,7 @@ export const why = {
     null,
   ],
   'chemistry-22-q2': [
-    '29 would be half the mass. It would apply to a doubly charged ion, not a singly charged one.',
+    'Nothing in the data halves the value. For a singly charged molecular ion the m/z equals the relative molecular mass, so a peak at 58 means 58, not 29.',
     null,
     '116 is twice the peak value. A singly charged molecular ion has an m/z equal to its mass.',
     'The molecular-ion peak is the usual way to find the relative molecular mass.',
@@ -2331,7 +2331,7 @@ export const why = {
     '−70 uses the entropy as +0.100 in place of −0.100. A negative ΔS makes the −TΔS term positive.',
     '−40 is ΔH alone. The entropy term, −TΔS = +30 kJ mol⁻¹, has been left out.',
     null,
-    '+10 is 40 − 30, which has the wrong sign for ΔH. The reaction is exothermic, so ΔH is negative.',
+    '+10 is the right size but the wrong sign. ΔG = −40 + 30 = −10 kJ mol⁻¹, because the exothermic ΔH is larger than the +30 kJ mol⁻¹ entropy term.',
   ],
   'chemistry-23-q2': [
     null,
@@ -2414,8 +2414,8 @@ export const why = {
   // ---- 24 Electrochemistry ----
   'chemistry-24-q1': [
     'This has the wrong sign. A spontaneous cell has a positive standard cell potential.',
-    '0.42 is 0.76 − 0.34, which has the wrong sign as well. The cell potential is the cathode value minus the anode value.',
-    '+0.42 is 0.76 − 0.34, the difference of the sizes. The potentials have opposite signs, so the sum is +0.34 − (−0.76).',
+    '−0.42 V comes from adding the two potentials, +0.34 and −0.76. The anode value must be subtracted, which gives +0.34 minus (−0.76) = +1.10 V.',
+    '+0.42 V is the difference of the two sizes, 0.76 minus 0.34. Subtracting the negative zinc potential adds the sizes: +0.34 minus (−0.76) = +1.10 V.',
     null,
   ],
   'chemistry-24-q2': [
@@ -2501,7 +2501,7 @@ export const why = {
     null,
     'The fluoride concentration has to be squared, because CaF₂ gives two F⁻ ions.',
     'The powers are on the wrong ions. The coefficient 2 belongs to fluoride, not calcium.',
-    'This is a constant that includes the solid. Ksp is the product of the ion concentrations alone.',
+    'This puts the solid CaF₂ in the expression and is upside down. Ksp is the product of the ion concentrations only, [Ca²⁺][F⁻]².',
   ],
   'chemistry-25-challenge-1': [
     null,
@@ -2620,7 +2620,7 @@ export const why = {
   ],
   'chemistry-26-practice-initial-rate-tangent-sign': [
     'This is the initial concentration, not a rate.',
-    'This gives an average with the wrong units, not the rate at time zero.',
+    'This is a single concentration divided by the final time, not a change in concentration. It gives a rough average over the whole run, not the gradient at time zero.',
     'The area has units of concentration × time. It is not a rate.',
     null,
   ],
@@ -2700,7 +2700,7 @@ export const why = {
   'chemistry-27-practice-calcium-nitrate-products': [
     'Group 2 nitrates do not give N₂O₅. They give NO₂ and O₂.',
     'The metal is not released, and NO₃ is not a stable species. The product is the oxide.',
-    'Nitrites form from Group 1 nitrates. This equation also does not balance, with 12 oxygen atoms on the left and 10 on the right.',
+    'Nitrites form from Group 1 nitrates other than lithium, not from Group 2. The equation also fails to balance, with 12 oxygen atoms on the left and 10 on the right.',
     null,
   ],
   'chemistry-27-practice-strontium-carbonate-products': [
@@ -3001,8 +3001,8 @@ export const why = {
     'Position 1 is already occupied by the COOH group.',
   ],
   'chemistry-extra-simple-benzene-hydrogenation-ratio': [
-    'One H₂ would saturate only one of the three double bond equivalents.',
-    'Two H₂ would leave a cyclohexadiene, C₆H₈.',
+    'One H₂ would give cyclohexadiene, C₆H₈, which still has two C=C bonds left to hydrogenate.',
+    'Two H₂ would give cyclohexene, C₆H₁₀, which still has one C=C bond. All three H₂ are needed to reach cyclohexane, C₆H₁₂.',
     null,
     'Six is the number of hydrogen atoms added, not the number of H₂ molecules.',
   ],
@@ -3064,7 +3064,7 @@ export const why = {
     'Oxidation of the side chain gives an acid, not phenol, and hydrogenation of the ring does not add a carbon.',
     null,
     'The aldehyde is only partial oxidation, and C₆H₅CH₃ is the unchanged starting material.',
-    'The products are swapped between the two reactions. Oxidation leaves the ring aromatic.',
+    'Oxidising CH₃ gives COOH with the ring still aromatic, so C₆H₁₁COOH is wrong. Ring hydrogenation gives C₆H₁₁CH₃, so C₆H₅CH₃ is only the unchanged starting material.',
   ],
   'chemistry-30-practice-nitration-charge-and-hydrogen': [
     null,
@@ -3117,7 +3117,7 @@ export const why = {
   ],
   'chemistry-extra-simple-chlorobenzene-catalyst': [
     null,
-    'Sodium chloride has no empty orbital to accept an electron pair, so it cannot polarise Cl₂.',
+    'Sodium chloride is an ionic salt, not an electron-pair acceptor like AlCl₃, so it cannot polarise Cl₂ to make an electrophile.',
     'Sodium carbonate is a base, not a Lewis acid.',
     'Copper(II) sulfate is not used to generate a chlorine electrophile.',
   ],
@@ -3137,7 +3137,7 @@ export const why = {
     'This puts the chlorine on the side chain, CH₂Cl, not on the ring.',
     null,
     'The 2-position is next to the first carbon, not opposite it.',
-    'The 3-position is meta, two carbons away, not opposite.',
+    'The 3-position is meta, with one ring carbon between it and carbon 1, so it is not directly opposite.',
   ],
   'chemistry-31-practice-bond-length-comparison': [
     'Chlorine does not receive a full charge. The bond is covalent, and it is shorter.',
@@ -3216,7 +3216,7 @@ export const why = {
     'Sodium chloride does not brominate the ring.',
     null,
     'Silver nitrate tests for halide ions and does not substitute the ring.',
-    'Sodium carbonate would deprotonate phenol and gives no precipitate of a bromo compound.',
+    'Sodium carbonate is a base, not a brominating agent, so it cannot substitute the ring. Phenol is too weak an acid to react with carbonates, so no precipitate forms.',
   ],
   'chemistry-32-challenge-1': [
     'Phenol is the stronger acid, not the stronger base. That is why it reacts with hydroxide.',
@@ -3358,7 +3358,7 @@ export const why = {
     null,
   ],
   'chemistry-33-practice-ethanedioic-oxidation-product': [
-    'Ethanal is not an oxidation product of an acid, and it has two carbons.',
+    'Ethanal is less oxidised than ethanedioic acid, so it cannot be the product of oxidising it. Complete oxidation takes both carbons up to CO₂.',
     'Ethanoic acid would be a reduction product of ethanedioic acid. It does not form on oxidation.',
     'Carbon monoxide has carbon at +2, but complete oxidation takes the carbon to +4.',
     null,
@@ -3406,7 +3406,7 @@ export const why = {
     null,
   ],
   'chemistry-33-practice-acyl-chloride-amine-pairs': [
-    'These are swapped. Methylamine has one N–H to lose, so X keeps one N–H, as in CH₃CONHCH₃.',
+    'These are swapped. Methylamine loses one of its two N–H hydrogens, so its amide keeps one N–H, as in CH₃CONHCH₃, while dimethylamine gives CH₃CON(CH₃)₂.',
     'These are the starting amines, not the amides that form.',
     'These are an ether and an ester. The reactions with amines give amides.',
     null,
@@ -3503,7 +3503,7 @@ export const why = {
     'Ethylamine is a stronger base than ammonia, because the ethyl group donates electrons.',
   ],
   'chemistry-34-practice-acid-hydrolysis-n-ethylamide': [
-    'In acid the carboxylic acid stays protonated and the amine is protonated, so the charges are the other way round.',
+    'In acidic solution the product stays as CH₃COOH, not CH₃COO⁻, and the amine takes up H⁺ to form CH₃CH₂NH₃⁺ rather than staying as free CH₃CH₂NH₂.',
     'Hydrolysis gives a carboxylic acid, not an aldehyde.',
     null,
     'The ethyl group on nitrogen stays with the nitrogen, giving ethylammonium, not ammonium.',
@@ -3630,7 +3630,7 @@ export const why = {
     'Dehydration, not reduction, gives propene, and adding water gives an alcohol, not a ketone.',
   ],
   'chemistry-36-practice-ester-cleavage-then-diol-oxidation': [
-    'Hydrolysis gives benzoic acid, not phenylacetic acid, and ethanoic acid would need a carbon to be lost.',
+    'Hydrolysis gives benzoic acid, not phenylacetic acid. Ethanoic acid would need one CH₂OH of the diol to end up as CH₃, which is a reduction, not the oxidation described.',
     null,
     'Propanedioic acid has three carbons. The diol has only two.',
     'The ring carbon is joined to the carboxyl carbon, so hydrolysis gives benzoic acid, not phenol.',
@@ -3710,7 +3710,7 @@ export const why = {
   ],
   'chemistry-35-practice-polyamide-hydrolysis-bond': [
     'The C=O bond stays in the carboxylic acid that forms.',
-    'The N–H bond is not the one that breaks.',
+    'The N–H bond stays intact. Water splits the C–N bond, and the nitrogen keeps its hydrogen as it becomes an amino group.',
     'The carbon–carbon bonds of the segments stay intact.',
     null,
   ],
@@ -3733,7 +3733,7 @@ export const why = {
     'This replaces an ester oxygen by a direct C–C bond, so a link of the diol is lost.',
   ],
   'chemistry-35-practice-hydroxyacid-alkaline-fragment': [
-    'This places the OH at the far end of a straight chain. The repeat unit has the OH beside the carboxyl group, with an ethyl branch.',
+    'HOCH₂CH₂CH₂COO⁻ has the OH on carbon 4. In the repeat unit the OH-bearing carbon is carbon 2, directly next to the carboxylate carbon.',
     'This places the OH on carbon 3. In the repeat unit it is on carbon 2, beside the carboxyl group.',
     'This has a ketone and no OH group. Hydrolysis restores OH and does not oxidise the carbon.',
     null,
@@ -3772,7 +3772,7 @@ export const why = {
   'chemistry-37-q2': [
     null,
     '2.5 is 7.5 ÷ 3.0, the ratio upside down. Rf is the spot distance over the solvent front distance, so it is below 1.',
-    '0.22 does not match 3.0 ÷ 7.5. The Rf value comes from dividing the two distances directly.',
+    'Rf = 3.0 cm ÷ 7.5 cm = 0.40, not 0.22. Both distances are measured from the baseline, and Rf is the spot distance divided by the solvent front distance.',
     '4.5 is 7.5 − 3.0, the difference. Rf is a ratio.',
   ],
   'chemistry-37-challenge-1': [
@@ -3844,7 +3844,7 @@ export const why = {
   'chemistry-37-practice-symmetrical-ether-spectrum': [
     'This would give a methoxy singlet, but the spectrum shows a quartet and a triplet, with areas 4 and 6.',
     'This gives more than two signals, and an OH peak.',
-    'This has four different proton environments, not two.',
+    'Butan-2-ol has five different proton environments (two different CH₃, CH₂, CH and OH), so its spectrum has far more than the two signals shown.',
     null,
   ],
   'chemistry-37-practice-aldehyde-by-carbon-symmetry': [
@@ -3860,7 +3860,7 @@ export const why = {
     null,
   ],
   'chemistry-37-practice-three-dimethylbenzene-isomers': [
-    'The first two are reversed. The 1,3-isomer has the lowest symmetry and the most signals, five.',
+    'The first two are the wrong way round. The 1,2-isomer has four signals because its ring carbons pair up three times, while the 1,3-isomer has five because only two pairs of ring carbons are equivalent.',
     'The isomers have different symmetry, so the numbers differ.',
     'The 1,4-isomer has the highest symmetry, so it has the fewest signals, three, and not four.',
     null,
